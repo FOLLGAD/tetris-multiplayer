@@ -4,8 +4,8 @@ maincnv = document.getElementById("main");
 scndcnv = document.getElementById("scnd");
 mainctx = maincnv.getContext("2d");
 scndctx = scndcnv.getContext("2d");
-maincnv.width = 20*20*10;
-maincnv.height = 40*20*10;
+maincnv.width = 20*20;
+maincnv.height = 40*20;
 mainctx.scale(20, 20);
 
 // mainctx.fillStyle = '#000';
@@ -48,22 +48,22 @@ function keyUpHandler(e) {
       break;
   }
 }
+let latestPacket;
 
 socket.on('packet', function(packet) {
   drawMatrix(packet.matrix);
-  console.log(packet.matrix);
+  latestPacket = packet;
 });
 
 const color = ['#000', 'red', 'green', 'yellow', 'blue'];
 
 function drawMatrix(matrix, offset) {
+  mainctx.clearRect(0, 0, maincnv.width, maincnv.height);
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {
       if (value !== 0) {
-        mainctx.clearRect(0, 0, maincnv.width, maincnv.height);
         mainctx.fillStyle = color[value];
-        mainctx.fillRect(x, y, 10, 10);
-        mainctx.scale(20, 20);
+        mainctx.fillRect(x, y, 1, 1);
       }
     });
   });
