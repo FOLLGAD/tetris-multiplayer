@@ -20,26 +20,24 @@ let Piece = function (x, y) {
   this.y = y;
 };
 
-let movingUp = false;
-let movingLeft = false;
-let movingDown = false;
-let movingRight = false;
+let movingUp = false, movingLeft = false, movingDown = false, movingRight = false;
 
 io.on('connection', function (socket) {
   io.on('key', function (input) {
     switch(input.inputkey) {
       case 'w':
-        beginRotating(socket.id);
+        rotatePiece(Player1);
         movingUp = input.state;
         break;
       case 'a':
-        move
+        movePiece(Player1, -1);
         movingLeft = input.state;
         break;
       case 's':
         movingDown = input.state;
         break;
       case 'd':
+      movePiece(Player1, 1);
         movingRight = input.state;
         break;
     }
@@ -67,10 +65,10 @@ const piece = [];
     [3, 3, 3],
     [0, 0, 0]
   ];
-let pieces;
 
-let arenaWidth = 20;
-let arenaHeight = 40;
+let arenaWidth = 20, arenaHeight = 40;
+
+let Player1, Player2;
 
 function initialize() {
   for (let i = 0; i < arenaHeight; i++) {
@@ -79,8 +77,7 @@ function initialize() {
       matrix[i].push(0);
     }
   }
-  pieces = [];
-  pieces.push(new Piece(arenaWidth / 2, 0));
+  Player1 = new Piece(arenaWidth / 2, 0);
 }
 
 function drawMatrix() {
@@ -107,6 +104,12 @@ function checkForCollision(piece, x, y) {
   }
 }
 
+function movePiece(piece, x) {
+  if (!checkForCollision(piece, piece.x + x, piece.y)) {
+    piece.x += x;
+  }
+}
+
 function rotatePiece(piece) {
   let n = piece.length;
   let pp = [];
@@ -118,25 +121,22 @@ function rotatePiece(piece) {
   }
   return piece;
 }
+// Removes the piece and instead applies it to the background
+function applyToMatrix(piece) {
+  for (let i = 0; i < piece.length; i++) {
+    for (let j = 0; j < piece[i].length; j++) {
+      piece.matrix[i][j];
+    }
+  }
+  Player1 = new Piece()
+}
 
-function tickPieces(piece) {
-  if(movingRight && !movingLeft) {
-    if (checkForCollision(piece.matrix, piece.x + 1, piece.y + 1)) {
-      piece.x++;
-      piece.y++;
-    }
-  } else if (movingLeft && !movingRight) {
-    if (checkForCollision(piece.matrix, piece.x - 1, piece.y - 1)) {
-      piece.x--;
-      piece.y--;
-    }
+function tickPieces() {
+  let inc = 1;
+  if (checkForCollision(piece, piece.x, piece.y + inc) {
+    applyToMatrix();
   }
-  if (movingUp) {
-    let rotated = rotatePiece(piece.matrix);
-    if (checkForCollision(rotated, piece.x, piece.y)) {
-      piece.matrix = rotated;
-    }
-  }
+  Player1.y += 1;
 }
 
 function update() {
