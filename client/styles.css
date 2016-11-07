@@ -8,21 +8,21 @@ html {
 }
 #scnd {
   margin-left: 200px;
-
 }
 #canvascontainer {
   top: 100px;
   position: fixed;
   width: 400px;
   height: 800px;
-  /*background: black;*/
   margin: 0 auto;
   left: 0;
   right: 0;
 }
 canvas {
-  /*background-color: purple;*/
   border: solid 1px;
+}
+#main {
+  outline: none;
 }
 #header {
   text-align: center;

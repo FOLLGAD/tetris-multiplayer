@@ -4,9 +4,10 @@ maincnv = document.getElementById("main");
 scndcnv = document.getElementById("scnd");
 mainctx = maincnv.getContext("2d");
 scndctx = scndcnv.getContext("2d");
-maincnv.width = 20*20;
-maincnv.height = 40*20;
-mainctx.scale(20, 20);
+let scale = 20;
+maincnv.width = 20 * scale;
+maincnv.height = 40 * scale;
+mainctx.scale(scale, scale);
 
 // mainctx.fillStyle = '#000';
 // mainctx.fillRect(0, 0, maincnv.width, maincnv.height);
@@ -30,9 +31,13 @@ function keyDownHandler(e) {
     case 'KeyD':
       socket.emit('key', { inputkey: 'd', state: true });
       break;
+    default:
+      return;
   }
+  e.preventDefault();
 }
 function keyUpHandler(e) {
+  e.preventDefault();
   switch(e.code) {
     case 'KeyW':
       socket.emit('key', { inputkey: 'w', state: false });
@@ -46,8 +51,15 @@ function keyUpHandler(e) {
     case 'KeyD':
       socket.emit('key', { inputkey: 'd', state: false });
       break;
+    default:
+      return;
   }
+  e.preventDefault();
 }
+
+socket.on('initgame', function(packet) {
+});
+
 let latestPacket;
 
 socket.on('packet', function(packet) {
