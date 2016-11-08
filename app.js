@@ -23,23 +23,26 @@ let Piece = function (x, y) {
 let movingUp = false, movingLeft = false, movingDown = false, movingRight = false;
 
 io.on('connection', function (socket) {
-  io.on('key', function (input) {
-    switch(input.inputkey) {
-      case 'w':
-        rotatePiece(Player1);
-        movingUp = input.state;
-        break;
-      case 'a':
-        movePiece(Player1, -1);
-        movingLeft = input.state;
-        break;
-      case 's':
-        movingDown = input.state;
-        break;
-      case 'd':
-        movePiece(Player1, 1);
-        movingRight = input.state;
-        break;
+  console.log("Client connected with ID:", socket.id);
+  socket.on('key', function (input) {
+    if (input.state) {
+      switch(input.inputkey) {
+        case 'w':
+          Player1.matrix = rotatePiece(Player1);
+          movingUp = input.state;
+          break;
+        case 'a':
+          movePiece(Player1, -1);
+          movingLeft = input.state;
+          break;
+        case 's':
+          movingDown = input.state;
+          break;
+        case 'd':
+          movePiece(Player1, 1);
+          movingRight = input.state;
+          break;
+      }
     }
   });
 });
@@ -73,18 +76,28 @@ let Player1, Player2;
 
 // creates an array filled with 0's, whose size is depending on the arenaWidth & arenaHeight variables
 function initialize() {
-  for (let i = 0; i < arenaHeight; i++) {
+  for (let i = 0; i < arenaWidth; i++) {
     matrix.push([]);
-    for (let j = 0; j < arenaWidth; j++) {
+    for (let j = 0; j < arenaHeight; j++) {
       matrix[i].push(0);
     }
   }
   Player1 = new Piece(arenaWidth / 2, 0);
+  matrix[0][0] = 3;
+  matrix[0][1] = 2;
 }
 
-// Draws the piece and the matrix
+// Draws the piece onto the matrix and returns the outcome
 function drawMatrix() {
-  let toDeliver = matrix;
+  let toDeliver = [];
+  let i = matrix.length;
+  while(i--) {
+    toDeliver[i] = [];
+    let o = matrix[i].length;
+    while(o--) {
+      toDeliver[i][o] = matrix[i][o];
+    }
+  }
   toDeliver = drawPiece(Player1, toDeliver);
   return toDeliver;
 }
@@ -93,19 +106,25 @@ function drawMatrix() {
 function drawPiece(piece, targetMatrix) {
   for (let i = piece.x; i < piece.matrix.length + piece.x; i++) {
     for (let j = piece.y; j < piece.matrix[i - piece.x].length + piece.y; j++) {
-      targetMatrix[i][j] = piece.matrix[j - piece.y][i - piece.x];
+      if (piece.matrix[j - piece.y][i - piece.x] !== 0) {
+        targetMatrix[i][j] = piece.matrix[j - piece.y][i - piece.x];
+      }
     }
   }
   return targetMatrix;
 }
 
 // Checks if the piece would obstruct anything if it were to move x, y amount of steps
-// Faulty, does not use the appointed variables, checks in place only
 function checkForCollision(piece, x, y) {
   for (let i = x; i < piece.matrix.length + x; i++) {
     for (let j = y; j < piece.matrix[i - x].length + y; j++) {
-      if (matrix[i][j] !== 0 && piece.matrix[j - y][i - x] !== 0) {
-        return true;
+      if (piece.matrix[j - y][i - x] !== 0) {
+        if (typeof matrix[i] == 'undefined' || typeof matrix[i][j] == 'undefined') {
+          return true;
+        }
+        else if (matrix[i][j] !== 0 && piece.matrix[j - y][i - x] !== 0) {
+          return true;
+        }
       }
     }
   }
@@ -113,38 +132,47 @@ function checkForCollision(piece, x, y) {
 }
 
 function movePiece(piece, x) {
-  if (!checkForCollision(piece, x, 0)) {
+  if (!checkForCollision(piece, piece.x + x, piece.y)) {
     piece.x += x;
   }
 }
 
 // takes in a piece of any size, rotates it 90 degrees clockwise and then returns as an array
 function rotatePiece(piece) {
-  let n = piece.length;
-  let pp = [];
+  let n = piece.matrix.length;
+  let pp = {};
+  pp.matrix = [];
   for (let i = 0; i < n; i++) {
-    pp.push([]);
+    pp.matrix.push([]);
     for (let j = 0; j < n; j++) {
-      pp[i].push(piece[n - j - 1][i]);
+      pp.matrix[i].push(piece.matrix[n - j - 1][i]);
     }
   }
-  return pp;
+  if (!checkForCollision(pp, piece.x, piece.y)) return pp.matrix;
+  else return piece.matrix;
 }
 // Removes the piece and instead applies it to the background
 function applyToMatrix(piece) {
-  for (let i = 0; i < piece.length; i++) {
-    for (let j = 0; j < piece[i].length; j++) {
-      matrix[i + piece.y][j + piece.x] = piece.matrix[i][j];
+  for (let i = piece.x; i < piece.matrix.length + piece.x; i++) {
+    for (let j = piece.y; j < piece.matrix[i - piece.x].length + piece.y; j++) {
+      if (piece.matrix[j - piece.y][i - piece.x] !== 0) {
+        matrix[i][j] = piece.matrix[j - piece.y][i - piece.x];
+      }
     }
   }
   Player1 = new Piece(arenaWidth / 2, 0);
 }
 
+let tickInc = 0;
+
 function tickPiece(piece) {
   let inc = 1;
-  piece.y += 1;
-  if (checkForCollision(piece, piece.x, piece.y + inc)) {
-    applyToMatrix(piece);
+  if (tickInc++ > 5) {
+    if (checkForCollision(piece, piece.x, piece.y + inc)) {
+      applyToMatrix(piece);
+    }
+    tickInc = 0;
+    piece.y += 1;
   }
 }
 

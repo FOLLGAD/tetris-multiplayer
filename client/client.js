@@ -50,6 +50,7 @@ function keyUpHandler(e) {
       break;
     case 'KeyD':
       socket.emit('key', { inputkey: 'd', state: false });
+      console.log("sent D");
       break;
     default:
       return;
