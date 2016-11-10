@@ -1,9 +1,7 @@
 /*jshint esversion: 6 */
 
 maincnv = document.getElementById("main");
-scndcnv = document.getElementById("scnd");
 mainctx = maincnv.getContext("2d");
-scndctx = scndcnv.getContext("2d");
 let scale = 20;
 maincnv.width = 20 * scale;
 maincnv.height = 40 * scale;
@@ -17,19 +15,40 @@ socket = io();
 maincnv.addEventListener('keydown', keyDownHandler, false);
 maincnv.addEventListener('keyup', keyUpHandler, false);
 
+let intervalStore = {};
+intervalStore.w = -1;
+intervalStore.a = -1;
+intervalStore.s = -1;
+intervalStore.d = -1;
+function StartLooping(key, state, delay) {
+  if (!delay) delay = 100;
+  if (intervalStore[key] === -1) {
+    clearInterval(intervalStore[key]);
+    socket.emit('key', { inputkey: key, state: state });
+    intervalStore[key] = setInterval(function (key, state) {
+      socket.emit('key', { inputkey: key, state: state });
+    }, delay, key, state);
+  }
+}
+
+function StopLooping(key) {
+  clearInterval(intervalStore[key]);
+  intervalStore[key] = -1;
+}
+
 function keyDownHandler(e) {
   switch(e.code) {
     case 'KeyW':
-      socket.emit('key', { inputkey: 'w', state: true });
+      StartLooping('w', true, 250);
       break;
     case 'KeyA':
-      socket.emit('key', { inputkey: 'a', state: true });
+      StartLooping('a', true);
       break;
     case 'KeyS':
-      socket.emit('key', { inputkey: 's', state: true });
+      StartLooping('s', true);
       break;
     case 'KeyD':
-      socket.emit('key', { inputkey: 'd', state: true });
+      StartLooping('d', true);
       break;
     default:
       return;
@@ -40,17 +59,16 @@ function keyUpHandler(e) {
   e.preventDefault();
   switch(e.code) {
     case 'KeyW':
-      socket.emit('key', { inputkey: 'w', state: false });
+      StopLooping('w');
       break;
     case 'KeyA':
-      socket.emit('key', { inputkey: 'a', state: false });
+      StopLooping('a');
       break;
     case 'KeyS':
-      socket.emit('key', { inputkey: 's', state: false });
+      StopLooping('s');
       break;
     case 'KeyD':
-      socket.emit('key', { inputkey: 'd', state: false });
-      console.log("sent D");
+      StopLooping('d');
       break;
     default:
       return;
@@ -59,16 +77,20 @@ function keyUpHandler(e) {
 }
 
 socket.on('initgame', function(packet) {
+  maincnv.width = packet.width * scale;
+  maincnv.height = packet.height * scale;
+  mainctx.scale(scale, scale);
 });
 
-let latestPacket;
+let latestPacket, score;
 
 socket.on('packet', function(packet) {
   drawMatrix(packet.matrix);
   latestPacket = packet;
+  document.getElementById("score").innerHTML = packet.score;
 });
 
-const color = ['#000', 'red', 'green', 'yellow', 'blue'];
+const color = ['#000', 'red', 'green', 'yellow', 'lightblue', 'pink', 'white', 'beige'];
 
 function drawMatrix(matrix, offset) {
   mainctx.clearRect(0, 0, maincnv.width, maincnv.height);

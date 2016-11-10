@@ -16,14 +16,17 @@ console.log("server is listening on port", port);
 
 let Piece = function (x, y) {
   this.matrix = getMatrix();
-  this.x = x - Math.floor(this.matrix[0].length/2);
+  this.x = x - Math.floor(this.matrix[0].length / 2);
   this.y = y;
 };
+
+let score;
 
 let movingUp = false, movingLeft = false, movingDown = false, movingRight = false;
 
 io.on('connection', function (socket) {
   console.log("Client connected with ID:", socket.id);
+  socket.emit('initgame', { width: arenaWidth, height: arenaHeight });
   socket.on('key', function (input) {
     if (input.state) {
       switch(input.inputkey) {
@@ -37,6 +40,7 @@ io.on('connection', function (socket) {
           break;
         case 's':
           movingDown = input.state;
+          MoveDown(Player1, 1);
           break;
         case 'd':
           movePiece(Player1, 1);
@@ -45,37 +49,62 @@ io.on('connection', function (socket) {
       }
     }
   });
+  socket.on('disconnect', function () {
+    console.log("Client disconnected with ID:", socket.id);
+  });
 });
 
 let matrix = [];
 const piecematrix = [];
   piecematrix[0] = [
-    [0, 0, 0],
-    [1, 1, 1],
-    [0, 1, 0]
+    [1, 0],
+    [1, 1],
+    [1, 0]
     ];
   piecematrix[1] = [
-    [2, 0, 0],
-    [2, 2, 2],
-    [0, 0, 0]
+    [2, 2],
+    [2, 0],
+    [2, 0]
   ];
   piecematrix[2] = [
-    [0, 0, 3],
-    [3, 3, 3],
-    [0, 0, 0]
+    [3, 0],
+    [3, 0],
+    [3, 3]
+  ];
+  piecematrix[3] = [
+    [0, 4],
+    [4, 4],
+    [4, 0]
+  ];
+  piecematrix[4] = [
+    [5, 5],
+    [5, 5]
+  ];
+  piecematrix[5] = [
+    [6],
+    [6],
+    [6],
+    [6]
+  ];
+  piecematrix[6] = [
+    [7, 0],
+    [7, 7],
+    [0, 7]
   ];
 
   function getMatrix() {
-    return piecematrix[Math.floor( Math.random() * 3 )];
+    return piecematrix[Math.floor( Math.random() * piecematrix.length )];
   }
 
 // Defines the play area
-let arenaWidth = 20, arenaHeight = 40;
+let arenaWidth = 20, arenaHeight = 30;
 
 let Player1, Player2;
 
 // creates an array filled with 0's, whose size is depending on the arenaWidth & arenaHeight variables
 function initialize() {
+  score = 0;
+  matrix = [];
   for (let i = 0; i < arenaWidth; i++) {
     matrix.push([]);
     for (let j = 0; j < arenaHeight; j++) {
@@ -83,8 +112,6 @@ function initialize() {
     }
   }
   Player1 = new Piece(arenaWidth / 2, 0);
-  matrix[0][0] = 3;
-  matrix[0][1] = 2;
 }
 
 // Draws the piece onto the matrix and returns the outcome
@@ -104,10 +131,10 @@ function drawMatrix() {
 
 // takes a piece and outputs it on the matrix
 function drawPiece(piece, targetMatrix) {
-  for (let i = piece.x; i < piece.matrix.length + piece.x; i++) {
-    for (let j = piece.y; j < piece.matrix[i - piece.x].length + piece.y; j++) {
-      if (piece.matrix[j - piece.y][i - piece.x] !== 0) {
-        targetMatrix[i][j] = piece.matrix[j - piece.y][i - piece.x];
+  for (let i = 0; i < piece.matrix.length; i++) {
+    for (let j = 0; j < piece.matrix[i].length; j++) {
+      if (piece.matrix[i][j] !== 0) {
+        targetMatrix[i + piece.x][j + piece.y] = piece.matrix[i][j];
       }
     }
   }
@@ -116,13 +143,13 @@ function drawPiece(piece, targetMatrix) {
 
 // Checks if the piece would obstruct anything if it were to move x, y amount of steps
 function checkForCollision(piece, x, y) {
-  for (let i = x; i < piece.matrix.length + x; i++) {
-    for (let j = y; j < piece.matrix[i - x].length + y; j++) {
-      if (piece.matrix[j - y][i - x] !== 0) {
-        if (typeof matrix[i] == 'undefined' || typeof matrix[i][j] == 'undefined') {
+  for (let i = 0; i < piece.matrix.length; i++) {
+    for (let j = 0; j < piece.matrix[i].length; j++) {
+      if (piece.matrix[i][j] !== 0) {
+        if (typeof matrix[i + x] == 'undefined' || typeof matrix[i + x][j + y] == 'undefined') {
           return true;
         }
-        else if (matrix[i][j] !== 0 && piece.matrix[j - y][i - x] !== 0) {
+        else if (matrix[i + x][j + y] !== 0 && piece.matrix[i][j] !== 0) {
           return true;
         }
       }
@@ -131,21 +158,25 @@ function checkForCollision(piece, x, y) {
   return false;
 }
 
-function movePiece(piece, x) {
-  if (!checkForCollision(piece, piece.x + x, piece.y)) {
+function movePiece(piece, x, y) {
+  if (!y) y = 0;
+  if (!checkForCollision(piece, piece.x + x, piece.y + y)) {
     piece.x += x;
+    piece.y += y;
   }
 }
 
 // takes in a piece of any size, rotates it 90 degrees clockwise and then returns as an array
 function rotatePiece(piece) {
   let n = piece.matrix.length;
+  let n2 = piece.matrix[0].length;
   let pp = {};
   pp.matrix = [];
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < n2; i++) {
     pp.matrix.push([]);
     for (let j = 0; j < n; j++) {
-      pp.matrix[i].push(piece.matrix[n - j - 1][i]);
+      // pp.matrix[i].push(piece.matrix[n - j - 1][i]);
+      pp.matrix[i].push(piece.matrix[j][n2 - i - 1]);
     }
   }
   if (!checkForCollision(pp, piece.x, piece.y)) return pp.matrix;
@@ -153,27 +184,52 @@ function rotatePiece(piece) {
 }
 // Removes the piece and instead applies it to the background
 function applyToMatrix(piece) {
-  for (let i = piece.x; i < piece.matrix.length + piece.x; i++) {
-    for (let j = piece.y; j < piece.matrix[i - piece.x].length + piece.y; j++) {
-      if (piece.matrix[j - piece.y][i - piece.x] !== 0) {
-        matrix[i][j] = piece.matrix[j - piece.y][i - piece.x];
+  for (let i = 0; i < piece.matrix.length; i++) {
+    for (let j = 0; j < piece.matrix[i].length; j++) {
+      if (piece.matrix[i][j] !== 0) {
+        matrix[i + piece.x][j + piece.y] = piece.matrix[i][j];
       }
     }
   }
+  CheckForFullRows();
   Player1 = new Piece(arenaWidth / 2, 0);
+  if (checkForCollision(Player1, Player1.x, Player1.y)) initialize();
 }
 
 let tickInc = 0;
 
+function MoveDown(piece, y) {
+  if (checkForCollision(piece, piece.x, piece.y + y)) {
+    applyToMatrix(piece);
+  } else {
+    piece.y += 1;
+  }
+}
+
 function tickPiece(piece) {
   let inc = 1;
   if (tickInc++ > 5) {
-    if (checkForCollision(piece, piece.x, piece.y + inc)) {
-      applyToMatrix(piece);
-    }
+    MoveDown(piece, inc);
     tickInc = 0;
-    piece.y += 1;
   }
+}
+
+function CheckForFullRows() {
+  for (let i = 0; i < arenaHeight; i++) {
+    for (let j = 0; j < arenaWidth; j++) {
+      if (matrix[j][i] === 0) break;
+      else if (j === arenaWidth - 1) ClearRow(i);
+    }
+  }
+}
+
+function ClearRow(row) {
+  let i = arenaWidth;
+  while (i-- > 0) {
+    matrix[i].splice(row, 1);
+    matrix[i].unshift(0);
+  }
+  score += 100;
 }
 
 let consoletick = 0;
@@ -185,8 +241,8 @@ function update() {
 
 function SendPacket() {
   let deliver = drawMatrix();
-  io.emit('packet', { matrix: deliver });
+  io.emit('packet', { matrix: deliver, score: score });
 }
 
 initialize();
-setInterval(update, 100);
+setInterval(update, 50);
