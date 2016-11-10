@@ -2,7 +2,7 @@
 
 maincnv = document.getElementById("main");
 mainctx = maincnv.getContext("2d");
-let scale = 20;
+let scale = 40;
 maincnv.width = 20 * scale;
 maincnv.height = 40 * scale;
 mainctx.scale(scale, scale);
@@ -12,14 +12,15 @@ mainctx.scale(scale, scale);
 
 socket = io();
 
-maincnv.addEventListener('keydown', keyDownHandler, false);
-maincnv.addEventListener('keyup', keyUpHandler, false);
+document.addEventListener('keydown', keyDownHandler, false);
+document.addEventListener('keyup', keyUpHandler, false);
 
 let intervalStore = {};
 intervalStore.w = -1;
 intervalStore.a = -1;
 intervalStore.s = -1;
 intervalStore.d = -1;
+
 function StartLooping(key, state, delay) {
   if (!delay) delay = 100;
   if (intervalStore[key] === -1) {
@@ -50,6 +51,9 @@ function keyDownHandler(e) {
     case 'KeyD':
       StartLooping('d', true);
       break;
+    case 'Space':
+      socket.emit('key', { inputkey: "space", state: true });
+      break;
     default:
       return;
   }
@@ -59,16 +63,19 @@ function keyUpHandler(e) {
   e.preventDefault();
   switch(e.code) {
     case 'KeyW':
-      StopLooping('w');
+      StopLooping('w', false);
       break;
     case 'KeyA':
-      StopLooping('a');
+      StopLooping('a', false);
       break;
     case 'KeyS':
-      StopLooping('s');
+      StopLooping('s', false);
       break;
     case 'KeyD':
-      StopLooping('d');
+      StopLooping('d', false);
+      break;
+    case 'Space':
+      StartLooping('space', false);
       break;
     default:
       return;
@@ -90,7 +97,7 @@ socket.on('packet', function(packet) {
   document.getElementById("score").innerHTML = packet.score;
 });
 
-const color = ['#000', 'red', 'green', 'yellow', 'lightblue', 'pink', 'white', 'beige'];
+const color = ['#000', 'red', 'green', 'yellow', 'blue', 'violet', 'orange', 'purple'];
 
 function drawMatrix(matrix, offset) {
   mainctx.clearRect(0, 0, maincnv.width, maincnv.height);

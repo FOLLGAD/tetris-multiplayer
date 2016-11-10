@@ -46,6 +46,9 @@ io.on('connection', function (socket) {
           movePiece(Player1, 1);
           movingRight = input.state;
           break;
+        case 'space':
+          MoveToBottom(Player1);
+          break;
       }
     }
   });
@@ -92,12 +95,12 @@ const piecematrix = [];
     [0, 7]
   ];
 
-  function getMatrix() {
-    return piecematrix[Math.floor( Math.random() * piecematrix.length )];
-  }
+function getMatrix() {
+  return piecematrix[Math.floor( Math.random() * piecematrix.length )];
+}
 
 // Defines the play area
-let arenaWidth = 20, arenaHeight = 30;
+let arenaWidth = 10, arenaHeight = 20;
 
 let Player1, Player2;
 
@@ -206,6 +209,16 @@ function MoveDown(piece, y) {
   }
 }
 
+function MoveToBottom(piece) {
+  for (let y = piece.y; y < matrix[0].length; y++) {
+    if (checkForCollision(piece, piece.x, y)) {
+      piece.y = y - 1;
+      applyToMatrix(piece);
+      return;
+    }
+  }
+}
+
 function tickPiece(piece) {
   let inc = 1;
   if (tickInc++ > 5) {
@@ -231,8 +244,6 @@ function ClearRow(row) {
   }
   score += 100;
 }
-
-let consoletick = 0;
 
 function update() {
   tickPiece(Player1);
