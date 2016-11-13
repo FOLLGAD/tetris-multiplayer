@@ -10,10 +10,11 @@
       <p>Score</p>
       <p id="score"></p>
     </div>
-    <div id="canvascontainer">
-      <canvas id="main" tabindex="1"></canvas>
-    </div>
+    <div id="clientcontainer">Players: <ul id="clientlist"></ul></div>
+    <div id="canvases"></div>
+    <button id="startgame" onclick="RequestGameStart()">Start Game</button>
   </body>
   <script src="/socket.io/socket.io.js"></script>
-  <script type="text/javascript" src="client.js"></script>
+  <script type="text/javascript" src="newclient.js"></script>
+  <script type="text/javascript" src="keyhandler.js"></script>
 </html>

@@ -7,89 +7,24 @@ maincnv.width = 20 * scale;
 maincnv.height = 40 * scale;
 mainctx.scale(scale, scale);
 
-// mainctx.fillStyle = '#000';
-// mainctx.fillRect(0, 0, maincnv.width, maincnv.height);
-
 socket = io();
 
-document.addEventListener('keydown', keyDownHandler, false);
-document.addEventListener('keyup', keyUpHandler, false);
-
-let intervalStore = {};
-intervalStore.w = -1;
-intervalStore.a = -1;
-intervalStore.s = -1;
-intervalStore.d = -1;
-
-function StartLooping(key, state, delay) {
-  if (!delay) delay = 100;
-  if (intervalStore[key] === -1) {
-    clearInterval(intervalStore[key]);
-    socket.emit('key', { inputkey: key, state: state });
-    intervalStore[key] = setInterval(function (key, state) {
-      socket.emit('key', { inputkey: key, state: state });
-    }, delay, key, state);
-  }
-}
-
-function StopLooping(key) {
-  clearInterval(intervalStore[key]);
-  intervalStore[key] = -1;
-}
-
-function keyDownHandler(e) {
-  switch(e.code) {
-    case 'KeyW':
-      StartLooping('w', true, 250);
-      break;
-    case 'KeyA':
-      StartLooping('a', true);
-      break;
-    case 'KeyS':
-      StartLooping('s', true);
-      break;
-    case 'KeyD':
-      StartLooping('d', true);
-      break;
-    case 'Space':
-      socket.emit('key', { inputkey: "space", state: true });
-      break;
-    default:
-      return;
-  }
-  e.preventDefault();
-}
-function keyUpHandler(e) {
-  e.preventDefault();
-  switch(e.code) {
-    case 'KeyW':
-      StopLooping('w', false);
-      break;
-    case 'KeyA':
-      StopLooping('a', false);
-      break;
-    case 'KeyS':
-      StopLooping('s', false);
-      break;
-    case 'KeyD':
-      StopLooping('d', false);
-      break;
-    case 'Space':
-      StartLooping('space', false);
-      break;
-    default:
-      return;
-  }
-  e.preventDefault();
-}
+let myid;
+let cnvctx = [];
 
 socket.on('initgame', function(packet) {
+  myid = packet.id;
   maincnv.width = packet.width * scale;
   maincnv.height = packet.height * scale;
   mainctx.scale(scale, scale);
+  for (let i = 1; i < packet.players; i++) {
+    let ncnv = document.createElement("canvas");
+    document.getElementById("canvases").appendChild(ncnv);
+    mainctx.scale(scale, scale);
+  }
 });
 
-let latestPacket, score;
+let latestPacket;
 
 socket.on('packet', function(packet) {
   drawMatrix(packet.matrix);
@@ -97,9 +32,17 @@ socket.on('packet', function(packet) {
   document.getElementById("score").innerHTML = packet.score;
 });
 
+socket.on('registerrequest', function() {
+  let name;
+  while (!name) {
+    name = prompt("Enter your username", "Guest");
+  }
+  socket.emit('register', { username: name });
+});
+
 const color = ['#000', 'red', 'green', 'yellow', 'blue', 'violet', 'orange', 'purple'];
 
-function drawMatrix(matrix, offset) {
+function drawMatrix(matrix) {
   mainctx.clearRect(0, 0, maincnv.width, maincnv.height);
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {

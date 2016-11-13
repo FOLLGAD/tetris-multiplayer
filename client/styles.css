@@ -15,7 +15,7 @@ html {
   right: 0;
 }
 canvas {
-  border: solid 1px;
+  border: solid 5px;
 }
 #main {
   outline: none;
@@ -28,4 +28,24 @@ canvas {
 }
 #scoreboard {
   position: fixed;
+}
+#canvases :nth-child(1) {
+  right: 0;
+  left: 0;
+  margin: auto;
+}
+#clientcontainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 20px;
+  width: 200px;
+  border: solid 1px black;
+  padding: 20px;
+  background: #EED;
+  word-break: break-all;
+}
+#clientlist {
+  list-style: none;
+  padding-left: 0;
 }

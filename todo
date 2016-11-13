@@ -1,0 +1,11 @@
+TODO List
+
+Add all-time Scoreboard
+
+Add Multiplayer type game
+
+Dynamic rotation (move piece to left/right if in tight space)
+
+Make rotation have its origin in the middle of the matrix
+
+Change / Add arrowkeys support with Z and X for rotation
