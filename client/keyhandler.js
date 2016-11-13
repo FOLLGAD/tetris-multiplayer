@@ -55,10 +55,8 @@ function keyDownHandler(e) {
       socket.emit('key', { inputkey: 'rotateminus90' });
       break;
   }
-  e.preventDefault();
 }
 function keyUpHandler(e) {
-  e.preventDefault();
   switch(e.code) {
     case 'KeyW':
     case 'ArrowUp':
