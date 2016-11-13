@@ -74,7 +74,7 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     console.log("Client disconnected with ID:", socket.id);
     DisconnectFromRoom(clientid);
-    delete clientroom.tetris[Players[clientid]];
+    delete clientroom.tetris[clientid];
     delete Players[clientid];
     io.to(clientroom.name).emit('playerlist', clientroom.players);
   });
@@ -154,6 +154,7 @@ class RoomClass {
     this.players = [];
     this.active = false;
     this.name = ((Math.random() * 10000) | 0).toString();
+    this.winlist = [];
   }
   Start () {
     if (this.players.length === 0 || this.active) return false;
@@ -165,14 +166,14 @@ class RoomClass {
     io.to(this.name).emit('initgame', { width: 10, height: 20, players: this.players.length });
   }
   Update() {
-    let lived = false;
+    let lived = 0;
     for (let id in this.tetris) {
       if (this.tetris[id].live) {
         this.tetris[id].TickPiece();
-        lived = true;
+        lived++;
       }
     }
-    if (!lived) this.Stop();
+    if (lived <= 1) this.Stop();
     this.SendPackets();
   }
   Stop() {
@@ -366,10 +367,9 @@ class Player {
     }
     this.CheckForFullRows();
     this.NewPiece();
-    if (this.CheckForCollision(this.piece, this.piece.x, this.piece.y)) this.Init();
+    if (this.CheckForCollision(this.piece, this.piece.x, this.piece.y)) this.Death();
   }
-  Init() {
-    this.piece = null;
+  Death() {
     this.live = false;
   }
   CheckForFullRows() {
