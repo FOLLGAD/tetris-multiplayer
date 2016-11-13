@@ -106,5 +106,6 @@ function DrawMatrix(matrix, canvas, context, piecequeue) {
 }
 
 function RequestGameStart() {
+  $('#startgame').hide();
   socket.emit('startgame');
 }
