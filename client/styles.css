@@ -1,21 +1,13 @@
 html {
   background: #222;
 }
-#main {
-  margin-left: auto;
-  margin-right: auto;
-  position: relative;
-}
-#canvascontainer {
-  top: 100px;
-  width: 400px;
-  height: 800px;
-  margin: 0 auto;
-  left: 0;
-  right: 0;
-}
 canvas {
   border: solid 5px;
+}
+@import url('https://fonts.googleapis.com/css?family=Roboto:900');
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 28px;
 }
 #main {
   outline: none;
@@ -28,6 +20,9 @@ canvas {
 }
 #scoreboard {
   position: fixed;
+}
+#menu-container {
+text-align: center;
 }
 #canvases :nth-child(1) {
   right: 0;
@@ -48,4 +43,14 @@ canvas {
 #clientlist {
   list-style: none;
   padding-left: 0;
+}
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 28px;
 }
