@@ -160,7 +160,11 @@ class RoomClass {
     this.active = false;
     this.name = ((Math.random() * 10000) | 0).toString();
     this.winlist = [];
+<<<<<<< HEAD
     this.type = 'single';
+=======
+    this.droprate = 1000;
+>>>>>>> origin/master
   }
   Start () {
     if (this.players.length === 0 || this.active) return false;
@@ -172,12 +176,16 @@ class RoomClass {
       this.tetris[this.players[i].id] = new Player(new Tetris());
     }
     io.to(this.name).emit('initgame', { width: 10, height: 20, players: this.players.length });
+    this.startingTime = Date.now();
   }
   Update() {
+    let dt = Date.now() - this.startingTime;
+    let level = (dt / 20000) | 0;
+    let speed = ((1 + 0.1 * level) * 100) | 0;
     let lived = 0;
     for (let id in this.tetris) {
       if (this.tetris[id].live) {
-        this.tetris[id].TickPiece();
+        this.tetris[id].TickPiece(speed);
         lived++;
       }
     }
@@ -187,7 +195,11 @@ class RoomClass {
   Stop() {
     console.log("Stop");
     this.active = false;
+<<<<<<< HEAD
     io.to(this.name).emit('gameover');
+=======
+    this.startingTime = 0;
+>>>>>>> origin/master
   }
   SendPackets() {
     let deliver = {};
@@ -352,13 +364,12 @@ class Player {
     this.ApplyToMatrix();
     this.dropCounter = 0;
   }
-  TickPiece() {
+  TickPiece(dt) {
     if (this.live) {
-      let dt = Date.now() - this.lastTime;
-      this.time =
+      // let dt = Date.now() - this.lastTime;
       this.lastTime = Date.now();
       this.dropCounter += dt;
-      if (this.dropCounter > this.droprate) {
+      while (this.dropCounter > this.droprate) {
         this.MoveDown(1);
         this.dropCounter -= this.droprate;
       }
@@ -426,4 +437,4 @@ function Update() {
   }
 }
 
-setInterval(Update, 100);
+setInterval(Update, 1000/30);
