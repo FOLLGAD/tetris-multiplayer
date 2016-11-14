@@ -31,8 +31,9 @@ io.on('connection', function (socket) {
   let clientroom;
   socket.emit('registerrequest', clientid);
 
-  socket.on('register', function (data) {
-    Players[clientid].username = data.username;
+  socket.on('register', function (username) {
+    if (!!clientroom) DisconnectFromRoom(clientid, clientroom);
+    Players[clientid].username = username;
     clientroom = ConnectToRoom(clientid);
     socket.join(clientroom.name);
     io.to(clientroom.name).emit('playerlist', clientroom.players);
@@ -66,17 +67,20 @@ io.on('connection', function (socket) {
     } catch(err) {
     }
   });
-
   socket.on('startgame', function () {
+    if (!!clientroom) {
       clientroom.Start();
+    }
   });
 
   socket.on('disconnect', function () {
     console.log("Client disconnected with ID:", socket.id);
-    DisconnectFromRoom(clientid);
-    delete clientroom.tetris[clientid];
     delete Players[clientid];
-    io.to(clientroom.name).emit('playerlist', clientroom.players);
+    if (!!clientroom) {
+      DisconnectFromRoom(clientid, clientroom);
+      delete clientroom.tetris[clientid];
+      io.to(clientroom.name).emit('playerlist', clientroom.players);
+    }
   });
 });
 
@@ -134,13 +138,14 @@ function ConnectToRoom (id) {
   return Rooms[Rooms.length - 1];
 }
 
-function DisconnectFromRoom(id) {
-  for (let i = 0; i < Rooms.length; i++) {
-    for (let p = 0; p < Rooms[i].players.length; p++) {
-      if (Rooms[i].players[p].id === id) {
-        let indx = Rooms[i].players.indexOf(Rooms[i].players[p]);
-        Rooms[i].players.splice(indx, 1);
-      }
+function DisconnectFromRoom(id, room) {
+  for (let p = 0; p < room.players.length; p++) {
+    if (room.players[p].id === id) {
+      delete room.tetris[id];
+      let indx = room.players.indexOf(room.players[p]);
+      room.players.splice(indx, 1);
+      if (room.players.length <= 0) Rooms.splice(Rooms.indexOf(room), 1);
+      return;
     }
   }
 }
@@ -155,9 +160,12 @@ class RoomClass {
     this.active = false;
     this.name = ((Math.random() * 10000) | 0).toString();
     this.winlist = [];
+    this.type = 'single';
   }
   Start () {
     if (this.players.length === 0 || this.active) return false;
+    if (this.players.length === 1) this.type = 'single';
+    else this.type = '';
     this.active = true;
     this.tetris = {};
     for (let i = 0; i < this.players.length; i++) {
@@ -173,12 +181,13 @@ class RoomClass {
         lived++;
       }
     }
-    if (lived <= 1) this.Stop();
+    if (lived <= 1 - (this.type == 'single')) this.Stop();
     this.SendPackets();
   }
   Stop() {
     console.log("Stop");
     this.active = false;
+    io.to(this.name).emit('gameover');
   }
   SendPackets() {
     let deliver = {};

@@ -54,6 +54,9 @@ function keyDownHandler(e) {
     case 'KeyX':
       socket.emit('key', { inputkey: 'rotateminus90' });
       break;
+    case 'Enter':
+      $('#input-chat').focus();
+      break;
   }
 }
 function keyUpHandler(e) {

@@ -7,13 +7,27 @@
   <body>
     <h1 id="header">TETRIS</h1>
     <div id="scoreboard">
-      <p>Score</p>
-      <p id="score"></p>
     </div>
-    <div id="clientcontainer">Players: <ul id="clientlist"></ul></div>
+    <div id="clientcontainer">
+      Players:
+      <ul id="clientlist">
+      </ul>
+    </div>
     <div id="canvases"></div>
     <div id="menu-container">
-    <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+      <form id="register" style="display: none">
+        <input id="register-input" autocomplete="off" autofocus="true" type="text">
+        <input type="submit">
+      </form>
+      <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+    </div>
+    <div id="chatdiv">
+      <ul>
+        <li>I'm a chat message ;)</li>
+      </ul>
+      <form id="chatform">
+        <input id="input-chat" autocomplete="off" autofocus="false" type="text">
+      </form>
     </div>
   </body>
 

@@ -15,22 +15,15 @@ body {
 #header {
   text-align: center;
   font-size: 48px;
-  font-family: "Courier New", Courier, monospace;
+  /*font-family: "Courier New", Courier, monospace;*/
+  font-family: 'Roboto', sans-serif;
   color: grey;
 }
 #scoreboard {
-  position: fixed;
-}
-#menu-container {
-text-align: center;
-}
-#canvases :nth-child(1) {
-  right: 0;
-  left: 0;
-  margin: auto;
+  position: relative;
 }
 #clientcontainer {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   margin: 20px;
@@ -44,13 +37,44 @@ text-align: center;
   list-style: none;
   padding-left: 0;
 }
+#menu-container {
+}
 .button {
     background-color: #4CAF50; /* Green */
     border: none;
     color: white;
     padding: 15px 32px;
-    text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 28px;
+}
+#chatdiv {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  margin: 20px;
+  background: grey;
+  padding: 10px;
+  width: 350px;
+  height: 300px;
+  font-size: 16px;
+}
+#input-chat {
+  position: absolute;
+  width: 100%;
+  border: none;
+  padding: 10px;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+#register {
+  width: 200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+#register input {
+  width: 100%;
+  padding: 10px;
+  left: 50%;
 }

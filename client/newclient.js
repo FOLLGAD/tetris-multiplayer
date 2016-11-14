@@ -1,18 +1,11 @@
 // jshint esversion: 6
 
-let canvases, canvasctx;
+let canvases = [], canvasctx = [];
 
 const socket = io();
 
 // Create a number of canvases
-
-socket.on('initgame', function(packet) {
-  let deprecatedcanvases = document.getElementById("canvases");
-  while(deprecatedcanvases.hasChildNodes()) {
-    deprecatedcanvases.removeChild(deprecatedcanvases.firstChild);
-  }
-  canvases = [];
-  canvasctx = [];
+socket.on('initgame', function (packet) {
   let scale = 20;
   for (let i = 0; i < packet.players; i++) {
       // sets scale to times two if it is your canvas
@@ -20,17 +13,16 @@ socket.on('initgame', function(packet) {
     if (i === 0) realscale = scale * 2;
     else realscale = scale;
 
-      // Creates a new canvas element with class tetrisCanvas
+      // creates a new canvas element with class tetrisCanvas
       // and applies it to the html
     let ncnv = document.createElement("canvas");
     ncnv.className = "tetrisCanvas";
     document.getElementById("canvases").appendChild(ncnv);
 
       // creates one score element for each player
-    // let score = document.createElement("p");
-    // score.className = "tetrisScore";
-    // score.id = i;
-    // document.getElementsByTagName("body").appendChild(score);
+    let score = document.createElement("p");
+
+    document.getElementById("scoreboard").appendChild(score);
 
       // arrays for easy later access
     canvases.push(document.getElementsByClassName("tetrisCanvas")[i]);
@@ -41,15 +33,36 @@ socket.on('initgame', function(packet) {
     canvasctx[i].scale(realscale, realscale);
   }
 });
+socket.on('gameover', function () {
+  let deprecatedcanvases = document.getElementById("canvases");
+  while(deprecatedcanvases.hasChildNodes()) {
+    deprecatedcanvases.removeChild(deprecatedcanvases.firstChild);
+  }
+  let oldscores = document.getElementById('scoreboard');
+  while(oldscores.hasChildNodes()) {
+    oldscores.removeChild(oldscores.firstChild);
+  }
+  canvases = [];
+  canvasctx = [];
+  $('#startgame').show();
+});
 
 let myid;
 
 socket.on('registerrequest', function(id) {
   myid = id;
+  $('#register').show();
+});
+
+$("form").submit(function (e) {
+  e.preventDefault();
   let name;
-  name = prompt("Enter your username", "Guest");
-  if (name == 'undefined' || name === null) name = "Guest";
-  socket.emit('register', { username: name });
+  if ($('#register-input').val() !== '')
+  name = $('#register-input').val();
+  else name = 'Unknown Tetro';
+  socket.emit('register', name);
+  $('#register').hide();
+  return false;
 });
 
 socket.on('playerlist', function (playersarray) {
@@ -109,3 +122,12 @@ function RequestGameStart() {
   $('#startgame').hide();
   socket.emit('startgame');
 }
+
+$('#input-chat').submit(function(e) {
+  e.preventDefault();
+  if (!!$("#input-chat").val().replace(/\s/g, '').length) {
+    socket.emit("chat-msg", $("#input-chat").val());
+  }
+  $("#input-chat").val("");
+  return false;
+});
