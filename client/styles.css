@@ -39,6 +39,11 @@ body {
   padding-left: 0;
 }
 #menu-container {
+  text-align: center;
+  margin-top: 100px;
+}
+#menu-container h1 {
+  color: grey;
 }
 .button {
     background-color: #4CAF50; /* Green */
@@ -46,8 +51,15 @@ body {
     color: white;
     padding: 15px 32px;
     text-decoration: none;
-    display: inline-block;
+    /*display: inline-block;*/
     font-size: 28px;
+    margin-top: 5px;
+}
+.button:disabled {
+  background-color: grey;
+}
+.button.space{
+  margin-right: 5px;
 }
 #gameover-container {
   position: absolute;
@@ -60,11 +72,12 @@ body {
 #gameover-content {
   position: relative;
   left: -50%;
-  background-color: red;
+  background-color: white;
+  text-align: center;
+  padding: 10px;
 }
 .center{
   text-align: center;
-  display: inline-block;
 }
 #chatdiv {
   position: absolute;
@@ -76,6 +89,9 @@ body {
   width: 350px;
   height: 300px;
   font-size: 16px;
+}
+.stretch{
+  width: 100%;
 }
 #chatlist {
   position: relative;
@@ -93,28 +109,40 @@ body {
   box-sizing: border-box;
 }
 #register {
-  width: 200px;
-  margin: 0 auto;
+  width: 250px;
+  margin: 0 auto 0 auto;
   box-sizing: border-box;
 }
-#register input {
+#register input[type="text"] {
   width: 100%;
-  padding: 10px;
-  left: 50%;
+  padding: 15px;
+  font-size: 28px;
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
 }
 #sendchat {
   position: absolute;
   right: 0;
   bottom: 0;
 }
-#roomselector {
-  width: 400px;
-  position: fixed;
+#roomselector-container {
+  width: 1000px;
+  position: absolute;
+  left: 50%;
+  top: 200px;
+}
+#roomselector-content {
+  position: relative;
+  left: -50%;
   background: white;
   border: 2px black;
-  left: 50%;
-  margin-left: -200px;
-  top: 30%;
+}
+#startgame-container {
+  position: relative;
+  left: -50%;
+  border: 2px black;
+  text-align: center;
 }
 #roomselector button {
   box-sizing: border-box;
@@ -128,4 +156,19 @@ body {
 }
 #canvases > div {
   display: inline-block;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
 }

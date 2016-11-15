@@ -6,11 +6,12 @@
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
   </head>
   <body>
-    <!-- <div id="gameover-container">
+    <div id="gameover-container" style="display: none">
       <div id="gameover-content">
-        <button class="button" id="restartgame" onclick="RequestGameStart()"Play Again</button>
+      <h1></h1>
+        <button class="button" id="restartgame" onclick="RequestGameStart()">Play Again</button>
       </div>
-    </div> -->
+    </div>
     <div id="scoreboard">
     </div>
     <div id="clientcontainer">
@@ -20,11 +21,20 @@
     </div>
     <div id="canvases"></div>
     <div id="menu-container">
+    <h1>Tetris</h1>
       <form id="register" style="display: none">
-        <input id="register-input" autocomplete="off" autofocus="true" type="text">
-        <input class="button center" type="submit" name="Enter" value="Enter">
+        <input id="register-input" name="register-input" placeholder="Your name" autocomplete="off" autofocus="true" type="text">
+        <input class="button stretch" type="submit" name="Enter" value="Enter">
       </form>
-      <button style="display:none" class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+    </div>
+    <div id="roomselector-container">
+      <div id="roomselector-content">
+      <table id="rooms">
+      </table>
+      </div>
+      <div id="startgame-container">
+        <button style="display:none" class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+      </div>
     </div>
     <div id="gamecontrols">
       <!-- <button class="gamemode">Marathon</button>
@@ -36,8 +46,6 @@
         <li>I'm a chat message ;)</li>
       </ul>
       <input id="input-chat" autocomplete="off" autofocus="false" type="text">
-    </div>
-    <div id="roomselector">
     </div>
   </body>
 

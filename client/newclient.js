@@ -1,31 +1,43 @@
 // jshint esversion: 6
 
 let canvases = [], canvasctx = [];
+let selectedRoom;
+
+$('body').on("click", "#rooms tr.room", function(){
+  console.log("clicked");
+  selectedRoom = $(this).children().first().html();
+  $(this).css({backgroundColor: "green"})
+  console.log("selectedRoom: "+selectedRoom);
+  UpdateJoinButton()
+});
 
 const socket = io();
 
 function RequestRoomInfo () {
   socket.emit('requestrooms');
 }
-
+function UpdateJoinButton(){
+    if (selectedRoom == null){
+    $("#join-room").attr('disabled','disabled');
+  }else{
+    $("#join-room").removeAttr('disabled');
+  }
+}
 socket.on('roominfo', function (roominfo) {
-  $('#roomselector').empty();
-  $('#roomselector').show();
+  $('#roomselector-content').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
+  $('#roomselector-content table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
+  UpdateJoinButton()
   roominfo.forEach((element, index) => {
-    $('#roomselector').append('<button>' + element.name + ": " + element.players + ' players</button>');
-    $('#roomselector > button:last').click(() => {
-      $('#roomselector').hide();
-      JoinGame(element.name);
+    $('#roomselector-content table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
+    $('#join-room').click(() => {
+      JoinGame(selectedRoom);
     });
   });
-  $('#roomselector').append('<button>Create new Room</button>');
-  $('#roomselector > button:last').click(() => {
+  $('#create-room').click(() => {
     console.log("newg");
-    $('#roomselector').hide();
     JoinGame(-1);
   });
-  $('#roomselector').append('<button>Refresh</button>');
-  $('#roomselector > button:last').click(() => {
+  $('#refresh-room').click(() => {
     RequestRoomInfo();
   });
 });
@@ -33,12 +45,14 @@ socket.on('roominfo', function (roominfo) {
 function JoinGame (roomname) {
   socket.emit('joinroom', roomname);
   $('#startgame').show();
+  console.log("start game showed");
 }
 
 // Create a number of canvases
 socket.on('initgame', function (packet) {
   ClearGameState();
-  $('#startgame').hide();
+  $('#roomselector-container').hide();
+  $('#gameover-container').hide();
   let scale = 20;
   for (let i = 0; i < packet.players; i++) {
       // sets scale to times two if it is your canvas
@@ -67,7 +81,8 @@ socket.on('initgame', function (packet) {
   }
 });
 socket.on('gameover', function (winner) {
-  $('#startgame').show();
+  $('#gameover-container').show();
+  $('#gameover-content h1').html("Fabian Wins!");
   $('#gamecontrols').show();
 });
 
