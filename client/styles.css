@@ -61,6 +61,9 @@ body {
 .button.space{
   margin-right: 5px;
 }
+.other-player {
+  float:left;
+}
 #gameover-container {
   position: absolute;
   /*margin-left: auto;

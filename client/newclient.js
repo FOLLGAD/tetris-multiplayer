@@ -62,7 +62,7 @@ socket.on('initgame', function (packet) {
 
       // creates a new canvas element with class tetrisCanvas
       // and applies it to the html
-    $('#canvases').append('<div></div>');
+    $('#canvases').append('<div class="other-player"></div>');
     $('#canvases > div:last').append('<canvas class="tetrisCanvas"></canvas>');
     $('#canvases > div:last').append('<ul></ul>');
     $('#canvases > div:last > ul').append('<li class="playerName"></li>');
