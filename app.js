@@ -46,13 +46,16 @@ io.on('connection', function (socket) {
       clientroom = ConnectToNewRoom(clientid);
     else
       clientroom = ConnectToRoomID(clientid, roomname);
-    socket.join(clientroom.name);
-    io.to(clientroom.name).emit('playerlist', clientroom.players);
+    if (!!clientroom && "name" in clientroom) {
+      socket.join(clientroom.name);
+      io.to(clientroom.name).emit('playerlist', clientroom.players);
+    }
   });
 
   socket.on('chat-msg', function (message) {
-    io.to(clientroom).emit('chat-msg', message);
-    console.log(Players[clientid].username, "wrote", message);
+    if (!!clientroom && "name" in clientroom)
+      io.to(clientroom.name).emit('chat-msg', message);
+      console.log(Players[clientid].username, "said", message);
   });
 
   socket.on('key', function (input) {
@@ -322,6 +325,7 @@ class Player {
   }
   // Move piece
   MovePiece(x, y) {
+    if (!this.live) return;
     if (!y) y = 0;
     if (!this.CheckForCollision(this.piece, this.piece.x + x, this.piece.y + y)) {
       this.piece.x += x;
@@ -330,6 +334,7 @@ class Player {
   }
   // takes in a piece of any size, rotates it 90 degrees clockwise and then returns as an array
   RotatePiece90() {
+    if (!this.live) return;
     let n = this.piece.matrix.length;
     let n2 = this.piece.matrix[0].length;
     let pp = {};
@@ -359,6 +364,7 @@ class Player {
     }
   }
   RotatePieceMinus90() {
+    if (!this.live) return;
     let n = this.piece.matrix.length;
     let n2 = this.piece.matrix[0].length;
     let pp = {};
@@ -388,6 +394,7 @@ class Player {
     }
   }
   MoveDown(y) {
+    if (!this.live) return;
     if (this.CheckForCollision(this.piece, this.piece.x, this.piece.y + y)) {
       this.ApplyToMatrix();
     } else {
@@ -396,6 +403,7 @@ class Player {
     this.dropCounter = 0;
   }
   MoveToBottom() {
+    if (!this.live) return;
     while (!this.CheckForCollision(this.piece, this.piece.x, this.piece.y)) {
       this.piece.y++;
     }
@@ -432,20 +440,22 @@ class Player {
     this.live = false;
   }
   CheckForFullRows() {
+    let rowscleared = 0;
     for (let i = 0; i < this.tetris.height; i++) {
       for (let j = 0; j < this.tetris.width; j++) {
         if (this.matrix[j][i] === 0) break;
-        else if (j === this.tetris.width - 1) this.ClearRow(i);
+        else if (j === this.tetris.width - 1) this.ClearRow(i, rowscleared++);
       }
     }
   }
-  ClearRow(row) {
+  ClearRow(row, nm) {
     let i = this.tetris.width;
     while (i-- > 0) {
       this.matrix[i].splice(row, 1);
       this.matrix[i].unshift(0);
     }
-    this.score += 100;
+    if (nm <= 1) this.score += 100;
+    else this.score += 200;
   }
   // Checks if the piece would obstruct anything if it were to move x, y amount of steps
   CheckForCollision(piece, x, y) {
@@ -477,3 +487,18 @@ function Update() {
 }
 
 setInterval(Update, 1000/30);
+
+setInterval(OutputServerInfo, 30000);
+
+function OutputServerInfo() {
+  console.log("Players:");
+  let string = "";
+  for (let id in Players) {
+    string = string + ": " + Players[id].username;
+  }
+  console.log(string);
+  console.log("Rooms: ");
+  Rooms.forEach(elem => {
+    console.log(elem.name + ": " + elem.players.length + " players");
+  });
+}

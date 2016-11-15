@@ -3,9 +3,14 @@
   <head>
     <title>Tetris</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
   </head>
   <body>
-    <!-- <h1 id="header">TETRIS</h1> -->
+    <!-- <div id="gameover-container">
+      <div id="gameover-content">
+        <button class="button" id="restartgame" onclick="RequestGameStart()"Play Again</button>
+      </div>
+    </div> -->
     <div id="scoreboard">
     </div>
     <div id="clientcontainer">
@@ -17,9 +22,9 @@
     <div id="menu-container">
       <form id="register" style="display: none">
         <input id="register-input" autocomplete="off" autofocus="true" type="text">
-        <input type="submit" name="Enter" value="Enter">
+        <input class="button center" type="submit" name="Enter" value="Enter">
       </form>
-      <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+      <button style="display:none" class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
     </div>
     <div id="gamecontrols">
       <!-- <button class="gamemode">Marathon</button>
@@ -37,6 +42,7 @@
   </body>
 
   <!-- JS -->
+  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
   <script
   src="https://code.jquery.com/jquery-3.1.1.min.js"
   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
@@ -44,4 +50,8 @@
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="newclient.js"></script>
   <script type="text/javascript" src="keyhandler.js"></script>
+  <!--
+        === EMIL AHLBÄCK PROD. ===
+              - 1999-2099 -
+  -->
 </html>

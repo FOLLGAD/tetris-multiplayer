@@ -33,26 +33,21 @@ function keyDownHandler(e) {
     case 'KeyW':
     case 'ArrowUp':
       StartLooping('w', true, 250);
-	  e.preventDefault();
       break;
     case 'KeyA':
     case 'ArrowLeft':
       StartLooping('a', true);
-	  e.preventDefault();
       break;
     case 'KeyS':
     case 'ArrowDown':
       StartLooping('s', true);
-	  e.preventDefault();
       break;
     case 'KeyD':
     case 'ArrowRight':
       StartLooping('d', true);
-	  e.preventDefault();
       break;
     case 'Space':
       socket.emit('key', { inputkey: 'space', state: true });
-	  e.preventDefault();
       break;
     case 'KeyZ':
       socket.emit('key', { inputkey: 'rotate90' });

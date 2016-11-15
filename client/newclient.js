@@ -32,6 +32,7 @@ socket.on('roominfo', function (roominfo) {
 
 function JoinGame (roomname) {
   socket.emit('joinroom', roomname);
+  $('#startgame').show();
 }
 
 // Create a number of canvases
@@ -65,7 +66,7 @@ socket.on('initgame', function (packet) {
     $('#gamecontrols').hide();
   }
 });
-socket.on('gameover', function () {
+socket.on('gameover', function (winner) {
   $('#startgame').show();
   $('#gamecontrols').show();
 });
@@ -136,7 +137,14 @@ socket.on('packet', function (packet) {
 });
 const arenaWidth = 10, arenaHeight = 20;
 
-const colors = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC'];
+// let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
+//T, J, L, S, O, I, Z
+const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
+const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
+const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000'];
+const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan']
+
+let colors = bright;
 
 function DrawMatrix(matrix, canvas, context, piecequeue) {
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -172,7 +180,6 @@ function SendChatMsg() {
 }
 
 socket.on('chat-msg', function (message) {
-  let chat = document.getElementById('chatlist');
-  let node = document.createElement('li');
-  node.appendChild(chat.appendChild(document.createTextNode('message')));
+  $('#chatlist').append("<li>" + message + "</li>");
+  $('#chatlist').scrollIntoView(false);
 });
