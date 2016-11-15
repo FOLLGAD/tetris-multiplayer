@@ -1,4 +1,5 @@
 // jshint esversion: 6
+/* jshint -W030 */
 
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
@@ -32,21 +33,26 @@ function keyDownHandler(e) {
     case 'KeyW':
     case 'ArrowUp':
       StartLooping('w', true, 250);
+	  e.preventDefault();
       break;
     case 'KeyA':
     case 'ArrowLeft':
       StartLooping('a', true);
+	  e.preventDefault();
       break;
     case 'KeyS':
     case 'ArrowDown':
       StartLooping('s', true);
+	  e.preventDefault();
       break;
     case 'KeyD':
     case 'ArrowRight':
       StartLooping('d', true);
+	  e.preventDefault();
       break;
     case 'Space':
       socket.emit('key', { inputkey: 'space', state: true });
+	  e.preventDefault();
       break;
     case 'KeyZ':
       socket.emit('key', { inputkey: 'rotate90' });
@@ -55,7 +61,7 @@ function keyDownHandler(e) {
       socket.emit('key', { inputkey: 'rotateminus90' });
       break;
     case 'Enter':
-      $('#input-chat').focus();
+      $('#input-chat').is(':focus') === true ? SendChatMsg() : $('#input-chat').focus();
       break;
   }
 }

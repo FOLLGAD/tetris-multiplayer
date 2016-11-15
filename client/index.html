@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <h1 id="header">TETRIS</h1>
+    <!-- <h1 id="header">TETRIS</h1> -->
     <div id="scoreboard">
     </div>
     <div id="clientcontainer">
@@ -17,17 +17,22 @@
     <div id="menu-container">
       <form id="register" style="display: none">
         <input id="register-input" autocomplete="off" autofocus="true" type="text">
-        <input type="submit">
+        <input type="submit" name="Enter" value="Enter">
       </form>
       <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
     </div>
+    <div id="gamecontrols">
+      <!-- <button class="gamemode">Marathon</button>
+      <button class="gamemode">Arena</button>
+      <button id="leaveroom">Leave Room</button> -->
+    </div>
     <div id="chatdiv">
-      <ul>
+      <ul id="chatlist">
         <li>I'm a chat message ;)</li>
       </ul>
-      <form id="chatform">
-        <input id="input-chat" autocomplete="off" autofocus="false" type="text">
-      </form>
+      <input id="input-chat" autocomplete="off" autofocus="false" type="text">
+    </div>
+    <div id="roomselector">
     </div>
   </body>
 

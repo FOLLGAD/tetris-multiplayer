@@ -78,3 +78,30 @@ body {
   padding: 10px;
   left: 50%;
 }
+#sendchat {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+#roomselector {
+  width: 400px;
+  position: fixed;
+  background: white;
+  border: 2px black;
+  left: 50%;
+  margin-left: -200px;
+  top: 30%;
+}
+#roomselector button {
+  box-sizing: border-box;
+  width: 100%;
+}
+.playerName {
+  list-style: none;
+}
+.playerScore {
+  list-style: none;
+}
+#canvases > div {
+  display: inline-block;
+}

@@ -28,15 +28,31 @@ io.on('connection', function (socket) {
   let clientid = socket.id;
   Players[clientid] = {};
   Players[clientid].id = socket.id;
+  Players[clientid].identity = Math.random() * 100000 | 0;
   let clientroom;
-  socket.emit('registerrequest', clientid);
+  socket.emit('registerrequest', { clientid, identity: Players[clientid].identity });
 
   socket.on('register', function (username) {
     if (!!clientroom) DisconnectFromRoom(clientid, clientroom);
     Players[clientid].username = username;
-    clientroom = ConnectToRoom(clientid);
+    // clientroom = ConnectToRoom(clientid);
+    // socket.join(clientroom.name);
+    // io.to(clientroom.name).emit('playerlist', clientroom.players);
+  });
+
+  socket.on('joinroom', function (roomname) {
+    if (!!clientroom) DisconnectFromRoom(clientid, clientroom);
+    if (roomname === -1)
+      clientroom = ConnectToNewRoom(clientid);
+    else
+      clientroom = ConnectToRoomID(clientid, roomname);
     socket.join(clientroom.name);
     io.to(clientroom.name).emit('playerlist', clientroom.players);
+  });
+
+  socket.on('chat-msg', function (message) {
+    io.to(clientroom).emit('chat-msg', message);
+    console.log(Players[clientid].username, "wrote", message);
   });
 
   socket.on('key', function (input) {
@@ -67,10 +83,21 @@ io.on('connection', function (socket) {
     } catch(err) {
     }
   });
-  socket.on('startgame', function () {
+  socket.on('startgame', () => {
     if (!!clientroom) {
       clientroom.Start();
     }
+  });
+
+  socket.on('requestrooms', () => {
+    let rooms = [];
+    Rooms.forEach(element => {
+      let obj = {};
+      obj.name = element.name;
+      obj.players = element.players.length;
+      rooms.push(obj);
+    });
+    socket.emit('roominfo', rooms);
   });
 
   socket.on('disconnect', function () {
@@ -138,6 +165,22 @@ function ConnectToRoom (id) {
   return Rooms[Rooms.length - 1];
 }
 
+function ConnectToRoomID (id, roomnumber) {
+  for (let room = 0; room < Rooms.length; room++) {
+    if (!Rooms[room].active && roomnumber == Rooms[room].name) {
+      Rooms[room].players.push(Players[id]);
+      return Rooms[room];
+    }
+  }
+  console.log("could not find room");
+}
+
+function ConnectToNewRoom (id) {
+  Rooms.push(new RoomClass());
+  Rooms[Rooms.length - 1].players.push(Players[id]);
+  return Rooms[Rooms.length - 1];
+}
+
 function DisconnectFromRoom(id, room) {
   for (let p = 0; p < room.players.length; p++) {
     if (room.players[p].id === id) {
@@ -160,16 +203,13 @@ class RoomClass {
     this.active = false;
     this.name = ((Math.random() * 10000) | 0).toString();
     this.winlist = [];
-<<<<<<< HEAD
     this.type = 'single';
-=======
     this.droprate = 1000;
->>>>>>> origin/master
   }
   Start () {
     if (this.players.length === 0 || this.active) return false;
     if (this.players.length === 1) this.type = 'single';
-    else this.type = '';
+    else this.type = 'multi';
     this.active = true;
     this.tetris = {};
     for (let i = 0; i < this.players.length; i++) {
@@ -195,19 +235,18 @@ class RoomClass {
   Stop() {
     console.log("Stop");
     this.active = false;
-<<<<<<< HEAD
     io.to(this.name).emit('gameover');
-=======
     this.startingTime = 0;
->>>>>>> origin/master
   }
   SendPackets() {
-    let deliver = {};
+    let deliver = [];
     for (let id in this.tetris) {
-      deliver[id] = {};
-      deliver[id].matrix = this.tetris[id].DrawMatrix();
-      deliver[id].pieceQueue = this.tetris[id].pieceQueue;
-      deliver[id].score = this.tetris[id].score;
+      const i = deliver.push({}) - 1;
+      deliver[i].matrix = this.tetris[id].DrawMatrix();
+      deliver[i].pieceQueue = this.tetris[id].pieceQueue;
+      deliver[i].score = this.tetris[id].score;
+      deliver[i].username = Players[id].username;
+      deliver[i].identity = Players[id].identity;
     }
     io.to(this.name).emit('packet', deliver);
   }
