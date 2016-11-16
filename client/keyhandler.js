@@ -3,6 +3,13 @@
 
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
+document.getElementById('input-chat').addEventListener('keydown', e => {
+  if (e.code == "Enter") SendChatMsg();
+  e.stopPropagation();
+}, false);
+document.getElementById('input-chat').addEventListener('keyup', e => {
+  e.stopPropagation();
+}, false);
 
 let intervalStore = {};
 intervalStore.w = -1;
@@ -56,7 +63,7 @@ function keyDownHandler(e) {
       socket.emit('key', { inputkey: 'rotateminus90' });
       break;
     case 'Enter':
-      $('#input-chat').is(':focus') === true ? SendChatMsg() : $('#input-chat').focus();
+      $('#input-chat').is(':focus') && $('#input-chat').focus();
       break;
   }
 }

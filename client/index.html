@@ -29,11 +29,11 @@
     </div>
     <div id="roomselector-container">
       <div id="roomselector-content">
-      <table id="rooms">
-      </table>
+        <table id="rooms"></table>
       </div>
-      <div id="startgame-container">
-        <button style="display:none" class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+      <div style="display:none" id="startgame-container">
+        <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+        <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
       </div>
     </div>
     <div id="gamecontrols">

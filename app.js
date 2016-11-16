@@ -55,11 +55,11 @@ io.on('connection', function (socket) {
   socket.on('chat-msg', function (message) {
     if (!!clientroom && "name" in clientroom)
       io.to(clientroom.name).emit('chat-msg', message);
-      console.log(Players[clientid].username, "said", message);
+      console.log(Players[clientid].username + ":", message);
   });
 
   socket.on('key', function (input) {
-    try {
+    if (!!clientroom) {
       switch(input.inputkey) {
         case 'w':
           clientroom.tetris[clientid].RotatePiece90();
@@ -83,7 +83,6 @@ io.on('connection', function (socket) {
           clientroom.tetris[clientid].RotatePieceMinus90();
           break;
       }
-    } catch(err) {
     }
   });
   socket.on('startgame', () => {
@@ -93,6 +92,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('requestrooms', () => {
+    if (!!clientroom) DisconnectFromRoom(clientid, clientroom);
     let rooms = [];
     Rooms.forEach(element => {
       let obj = {};
@@ -103,7 +103,7 @@ io.on('connection', function (socket) {
     socket.emit('roominfo', rooms);
   });
 
-  socket.on('disconnect', function () {
+  socket.on('disconnect', () => {
     console.log("Client disconnected with ID:", socket.id);
     delete Players[clientid];
     if (!!clientroom) {
@@ -225,20 +225,20 @@ class RoomClass {
     let dt = Date.now() - this.startingTime;
     let level = (dt / 20000) | 0;
     let speed = ((1 + 0.1 * level) * 100) | 0;
-    let lived = 0;
+    let lived = [];
     for (let id in this.tetris) {
       if (this.tetris[id].live) {
         this.tetris[id].TickPiece(speed);
-        lived++;
+        lived.push(id);
       }
     }
-    if (lived <= 1 - (this.type == 'single')) this.Stop();
+    if (lived.length === 1 && this.type != 'single') this.Stop(Players[lived[0]].username);
+    else if (lived.length === 0) this.Stop();
     this.SendPackets();
   }
-  Stop() {
-    console.log("Stop");
+  Stop(winner = -1) {
     this.active = false;
-    io.to(this.name).emit('gameover');
+    io.to(this.name).emit('gameover', winner);
     this.startingTime = 0;
   }
   SendPackets() {

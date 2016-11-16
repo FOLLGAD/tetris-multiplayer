@@ -51,7 +51,7 @@ body {
     color: white;
     padding: 15px 32px;
     text-decoration: none;
-    /*display: inline-block;*/
+    display: inline-block;
     font-size: 28px;
     margin-top: 5px;
 }
@@ -60,6 +60,10 @@ body {
 }
 .button.space{
   margin-right: 5px;
+}
+#leaveroom {
+  background-color: #322F2D;
+  font-size: 16px;
 }
 .other-player {
   float:left;
@@ -100,7 +104,9 @@ body {
   position: relative;
   overflow-y: auto;
   list-style: none;
-  height: 80%
+  padding: 10px;
+  height: 80%;
+  margin: 0;
 }
 #input-chat {
   position: absolute;
@@ -146,6 +152,9 @@ body {
   left: -50%;
   border: 2px black;
   text-align: center;
+}
+#startgame-container > button {
+  display: block; /* TODO: FIX */
 }
 #roomselector button {
   box-sizing: border-box;

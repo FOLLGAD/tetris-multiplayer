@@ -1,14 +1,13 @@
 // jshint esversion: 6
 
-let canvases = [], canvasctx = [];
-let selectedRoom;
+let canvases = [], canvasctx = [], selectedRoom;
 
 $('body').on("click", "#rooms tr.room", function(){
   console.log("clicked");
   selectedRoom = $(this).children().first().html();
-  $(this).css({backgroundColor: "green"})
+  $(this).css({backgroundColor: "green"});
   console.log("selectedRoom: "+selectedRoom);
-  UpdateJoinButton()
+  UpdateJoinButton();
 });
 
 const socket = io();
@@ -17,7 +16,7 @@ function RequestRoomInfo () {
   socket.emit('requestrooms');
 }
 function UpdateJoinButton(){
-    if (selectedRoom == null){
+    if (selectedRoom === null) {
     $("#join-room").attr('disabled','disabled');
   }else{
     $("#join-room").removeAttr('disabled');
@@ -26,7 +25,7 @@ function UpdateJoinButton(){
 socket.on('roominfo', function (roominfo) {
   $('#roomselector-content').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
   $('#roomselector-content table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
-  UpdateJoinButton()
+  UpdateJoinButton();
   roominfo.forEach((element, index) => {
     $('#roomselector-content table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
     $('#join-room').click(() => {
@@ -34,7 +33,6 @@ socket.on('roominfo', function (roominfo) {
     });
   });
   $('#create-room').click(() => {
-    console.log("newg");
     JoinGame(-1);
   });
   $('#refresh-room').click(() => {
@@ -44,8 +42,14 @@ socket.on('roominfo', function (roominfo) {
 
 function JoinGame (roomname) {
   socket.emit('joinroom', roomname);
-  $('#startgame').show();
+  $('#startgame-container').show();
   console.log("start game showed");
+}
+
+function LeaveRoom () {
+  socket.emit('requestrooms');
+  $('#startgame-container').hide();
+  $('#roomselector-content').show();
 }
 
 // Create a number of canvases
@@ -82,7 +86,7 @@ socket.on('initgame', function (packet) {
 });
 socket.on('gameover', function (winner) {
   $('#gameover-container').show();
-  $('#gameover-content h1').html("Fabian Wins!");
+  $('#gameover-content h1').html(winner + " wins!");
   $('#gamecontrols').show();
 });
 
@@ -120,22 +124,15 @@ $("form").submit(function (e) {
 });
 
 socket.on('playerlist', function (playersarray) {
-  let deprecatednodes = document.getElementById("clientlist");
-  while (deprecatednodes.hasChildNodes()) {
-    deprecatednodes.removeChild(deprecatednodes.firstChild);
-  }
-  // recieves an array with connected playersarray
-  // then outputs it in form of a name under each canvas & in a list
-  let listElement = document.getElementById('clientlist');
+  $('#roomselector-content').hide();
+  $('#clientlist').empty();
   for (let i = 0; i < playersarray.length; i++) {
-    let node = document.createElement('li');
-    let textnode = document.createTextNode(playersarray[i].username);
-    node.appendChild(textnode);
-    listElement.appendChild(node);
+    $('#clientlist').append('<li>'+ playersarray[i].username +'</li>');
   }
+  $('#inroom-controls').show();
 });
 
-socket.on('packet', function (packet) {
+socket.on('packet', packet => {
   let cnv = 1;
   packet.forEach(element => {
     if (element.identity === myidentity) {
@@ -154,10 +151,10 @@ const arenaWidth = 10, arenaHeight = 20;
 
 // let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
 //T, J, L, S, O, I, Z
-const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
-const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
 const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000'];
-const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan']
+const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan']; // in honor of the brave Samuel Söderberg. support the fight against autism
+const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
+const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
 
 let colors = bright;
 
@@ -196,5 +193,7 @@ function SendChatMsg() {
 
 socket.on('chat-msg', function (message) {
   $('#chatlist').append("<li>" + message + "</li>");
-  $('#chatlist').scrollIntoView(false);
+  $('#chatlist').scrollTop($('#chatlist').prop("scrollHeight"));
 });
+
+const DispOwner = e => console.warn(e);
