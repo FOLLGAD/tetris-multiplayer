@@ -69,9 +69,6 @@ body {
   background-color: #322F2D;
   font-size: 16px;
 }
-.other-player {
-  float:left;
-}
 #gameover-container {
   position: absolute;
   /*margin-left: auto;
@@ -185,6 +182,7 @@ body {
 }
 #canvases > div {
   display: inline-block;
+  float:left;
 }
 table {
     font-family: arial, sans-serif;

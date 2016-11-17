@@ -1,6 +1,7 @@
 // jshint esversion: 6
+// jshint -W030
 
-let canvases = [], canvasctx = [], selectedRoom;
+let canvases = [], canvasctx = [], mycanvas, myctx, selectedRoom;
 
 // let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
 //T, J, L, S, O, I, Z
@@ -9,10 +10,10 @@ const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 
 const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
 const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
 
-let colors = bright;
+const colorthemes = { bright, autism, monochrome, monochromeold };
+let colors = colorthemes.bright;
 
 $('body').on("click", "#rooms tr.room", function(){
-  console.log("clicked");
   selectedRoom = $(this).children().first().html();
   $(this).css({backgroundColor: "green"});
   console.log("selectedRoom: "+selectedRoom);
@@ -20,14 +21,14 @@ $('body').on("click", "#rooms tr.room", function(){
 });
 $('#options-button').on("click", function(){
   $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();
-  $('input:radio[name=color]').forEach(() => {
-    if (eval("colors == " + $(this).val()))
+  $('input:radio[name=color]').each(() => {
+    if (colors == colorthemes[$(this).val()])
       $(this).checked = true;
   });
 });
 
 $('#options-content > input').click(() => {
-  eval("colors = " + $('input[name=color]:checked').val());
+  colors = colorthemes[$('input[name=color]:checked').val()];
 });
 
 const socket = io();
@@ -36,7 +37,7 @@ function RequestRoomInfo () {
   socket.emit('requestrooms');
 }
 function UpdateJoinButton(){
-    if (selectedRoom === null) {
+  if (selectedRoom === null) {
     $("#join-room").attr('disabled','disabled');
   }else{
     $("#join-room").removeAttr('disabled');
@@ -46,7 +47,7 @@ socket.on('roominfo', function (roominfo) {
   $('#roomselector-content').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
   $('#roomselector-content table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
   UpdateJoinButton();
-  roominfo.forEach((element, index) => {
+  roominfo.forEach(element => {
     $('#roomselector-content table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
     $('#join-room').click(() => {
       JoinGame(selectedRoom);
@@ -63,7 +64,6 @@ socket.on('roominfo', function (roominfo) {
 function JoinGame (roomname) {
   socket.emit('joinroom', roomname);
   $('#startgame-container').show();
-  console.log("start game showed");
 }
 
 function LeaveRoom () {
@@ -78,33 +78,45 @@ socket.on('initgame', function (packet) {
   $('#roomselector-container').hide();
   $('#gameover-container').hide();
   let scale = 20;
-  for (let i = 0; i < packet.players; i++) {
-      // sets scale to times two if it is your canvas
-    let realscale;
-    if (i === 0) realscale = scale * 2;
-    else realscale = scale;
+  packet.players.forEach(player => {
+    let realscale, canvasid;
+    // sets scale to times two if it is your canvas
+    if (player.identity == myidentity) {
+      realscale = scale * 2;
+      canvasid = '#maincanvas';
+    } else {
+      realscale = scale;
+      canvasid = '#canvases';
+    }
 
-      // creates a new canvas element with class tetrisCanvas
-      // and applies it to the html
-    $('#canvases').append('<div class="other-player"></div>');
-    $('#canvases > div:last').append('<canvas class="tetrisCanvas"></canvas>');
-    $('#canvases > div:last').append('<ul></ul>');
-    $('#canvases > div:last > ul').append('<li class="playerName"></li>');
-    $('#canvases > div:last > ul').append('<li class="playerScore"></li>');
-
-      // creates one score element for each player
-
-      // arrays for easy later access
-    canvases.push(document.getElementsByClassName("tetrisCanvas")[i]);
-    canvasctx.push(canvases[i].getContext('2d'));
-
-    canvases[i].width = (packet.width + 5) * realscale;
-    canvases[i].height = (packet.height) * realscale;
-    canvasctx[i].scale(realscale, realscale);
+    // creates a new canvas element with class tetrisCanvas
+    $(canvasid).append('<div class="other-player"></div>');
+    $(canvasid + ' > div:last').append('<canvas class="tetrisCanvas"></canvas>');
+    $(canvasid + ' > div:last').append('<ul></ul>');
+    $(canvasid + ' > div:last > ul').append('<li class="playerName"></li>');
+    $(canvasid + ' > div:last > ul').append('<li class="playerScore"></li>');
+    // arrays for easy later access
+    if (player.identity == myidentity) {
+      mycanvas = $('#maincanvas > div > canvas')[0];
+      mycanvas.width = (packet.width + 5) * realscale;
+      mycanvas.height = packet.height * realscale;
+      myctx = mycanvas.getContext('2d');
+      myctx.scale(realscale, realscale);
+    }
     $('#gamecontrols').hide();
-  }
+  });
+  canvases.push(...$('#canvases > div > canvas'));
+  canvases.forEach(elem => canvasctx.push(elem.getContext('2d')));
+  canvases.forEach(elem => {
+    elem.width = (packet.width + 5) * scale;
+    elem.height = packet.height * scale;
+  });
+  canvasctx.forEach(elem => {
+    elem.scale(scale, scale);
+  });
+
 });
-socket.on('gameover', function (winner) {
+socket.on('gameover', winner => {
   $('#gameover-container').show();
   if (winner === -1)
     $('#gameover-content h1').html("You lost.");
@@ -128,13 +140,13 @@ function ClearGameState () {
 
 let myid;
 
-socket.on('registerrequest', function(id) {
+socket.on('registerrequest', id => {
   myid = id.clientid;
   myidentity = id.identity;
   $('#register').show();
 });
 
-$("form").submit(function (e) {
+$("form").submit(e => {
   e.preventDefault();
   let name;
   if ($('#register-input').val() !== '')
@@ -142,11 +154,10 @@ $("form").submit(function (e) {
   else name = 'Unknown Tetro';
   socket.emit('register', name);
   $('#register').hide();
-
   socket.emit('requestrooms');
 });
 
-socket.on('playerlist', function (playersarray) {
+socket.on('playerlist', playersarray => {
   $('#roomselector-content').hide();
   $('#clientlist').empty();
   for (let i = 0; i < playersarray.length; i++) {
@@ -156,16 +167,16 @@ socket.on('playerlist', function (playersarray) {
 });
 
 socket.on('packet', packet => {
-  let cnv = 1;
-  packet.forEach(element => {
-    if (element.identity === myidentity) {
-      DrawMatrix(element.matrix, canvases[0], canvasctx[0], element.pieceQueue);
-      $('#canvases > div:nth-child(1) > ul > .playerName').text(element.username);
-      $('#canvases > div:nth-child(1) > ul > .playerScore').text(element.score);
+  let cnv = 0;
+  packet.forEach(player => {
+    if (player.identity === myidentity) {
+      DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue);
+      $('#maincanvas > div > ul > .playerName').text(player.username);
+      $('#maincanvas > div > ul > .playerScore').text(player.score);
     } else {
-      DrawMatrix(element.matrix, canvases[cnv], canvasctx[cnv], element.pieceQueue);
-      $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerName').text(element.username);
-      $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerScore').text(element.score);
+      DrawMatrix(player.matrix, canvases[cnv], canvasctx[cnv], player.pieceQueue);
+      $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerName').text(player.username);
+      $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerScore').text(player.score);
       cnv++;
     }
   });

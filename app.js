@@ -193,8 +193,10 @@ function ConnectToRoom (id) {
 
 function ConnectToRoomID (id, roomnumber) {
   for (let room = 0; room < Rooms.length; room++) {
-    if (!Rooms[room].active && roomnumber == Rooms[room].name) {
+    if (roomnumber == Rooms[room].name) {
       Rooms[room].players.push(Players[id]);
+      if (Rooms[room].active)
+        io.to(id).emit('initgame', { width: 10, height: 20, players: Object.keys(Rooms[room].tetris).length });
       return Rooms[room];
     }
   }
@@ -227,7 +229,7 @@ class RoomClass {
     this.tetris = {};
     this.players = [];
     this.active = false;
-    this.name = ((Math.random() * 10000) | 0).toString();
+    this.name = ((Math.random() * 100000) | 0).toString();
     this.winlist = [];
     this.type = 'single';
     this.droprate = 1000;
@@ -241,22 +243,29 @@ class RoomClass {
     for (let i = 0; i < this.players.length; i++) {
       this.tetris[this.players[i].id] = new Player(new Tetris());
     }
-    io.to(this.name).emit('initgame', { width: 10, height: 20, players: this.players.length });
+    let deliver = [];
+    for (let id in this.tetris) {
+      const i = deliver.push({}) - 1;
+      deliver[i].score = this.tetris[id].score;
+      deliver[i].username = Players[id].username;
+      deliver[i].identity = Players[id].identity;
+    }
+    io.to(this.name).emit('initgame', { width: 10, height: 20, players: deliver });
     this.startingTime = Date.now();
   }
   Update() {
     let dt = Date.now() - this.startingTime;
     let level = (dt / 20000) | 0;
     let speed = ((1 + 0.1 * level) * 100) | 0;
-    let lived = [];
+    let livecount = [];
     for (let id in this.tetris) {
       if (this.tetris[id].live) {
         this.tetris[id].TickPiece(speed);
-        lived.push(id);
+        livecount.push(id);
       }
     }
-    if (lived.length === 1 && this.type != 'single') this.Stop(Players[lived[0]].username);
-    else if (lived.length === 0) this.Stop();
+    if (livecount.length === 1 && this.type != 'single') this.Stop(Players[livecount[0]].username);
+    else if (livecount.length === 0) this.Stop();
     this.SendPackets();
   }
   Stop(winner = -1) {
@@ -470,7 +479,7 @@ class Player {
         else if (j === this.tetris.width - 1) {
           this.ClearRow(i);
           rowscleared++;
-        };
+        }
       }
     }
     if (rowscleared === 1) this.score += 40;
