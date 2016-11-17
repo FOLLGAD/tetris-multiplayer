@@ -83,6 +83,19 @@ body {
   text-align: center;
   padding: 10px;
 }
+#options-container {
+  position: absolute;
+  width: 500px;
+  top: 25%;
+  left: 50%;
+}
+#options-content {
+  position: relative;
+  left: -50%;
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+}
 .center{
   text-align: center;
 }

@@ -6,6 +6,7 @@
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
   </head>
   <body>
+    <button id="options-button" class="button">Options</button>
     <div id="gameover-container" style="display: none">
       <div id="gameover-content">
       <h1></h1>
@@ -21,7 +22,7 @@
     </div>
     <div id="canvases"></div>
     <div id="menu-container">
-    <h1>Tetris</h1>
+      <h1>Tetris</h1>
       <form id="register" style="display: none">
         <input id="register-input" name="register-input" placeholder="Your name" autocomplete="off" autofocus="true" type="text">
         <input class="button stretch" type="submit" name="Enter" value="Enter">
@@ -36,6 +37,14 @@
         <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
       </div>
     </div>
+    <div id="options-container" style="display:none">
+      <div id="options-content">
+        <h1>Blockstyles</h1>
+        <input type="radio" name="color" value="Bright"> Bright <br/>
+        <input type="radio" name="color" value="Saturated"> Saturated <br/>
+        <input type="radio" name="color" value="Monochrome"> Monochrome <br/>
+      </div>
+    </div>
     <div id="gamecontrols">
       <!-- <button class="gamemode">Marathon</button>
       <button class="gamemode">Arena</button>
@@ -43,7 +52,7 @@
     </div>
     <div id="chatdiv">
       <ul id="chatlist">
-        <li>I'm a chat message ;)</li>
+        <li>Welcome to Tetris, gay boy</li>
       </ul>
       <input id="input-chat" autocomplete="off" autofocus="false" type="text">
     </div>

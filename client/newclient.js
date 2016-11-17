@@ -9,7 +9,11 @@ $('body').on("click", "#rooms tr.room", function(){
   console.log("selectedRoom: "+selectedRoom);
   UpdateJoinButton();
 });
-
+$('#options-button').on("click", function(){
+  $("#options-container").show();
+  if (colors == bright)
+    $("options-content > input:nth-child(1)").prop("checked", true);
+});
 const socket = io();
 
 function RequestRoomInfo () {
@@ -86,7 +90,10 @@ socket.on('initgame', function (packet) {
 });
 socket.on('gameover', function (winner) {
   $('#gameover-container').show();
-  $('#gameover-content h1').html(winner + " wins!");
+  if (winner === -1)
+    $('#gameover-content h1').html("You lost.");
+  else
+    $('#gameover-content h1').html(winner + " wins!");
   $('#gamecontrols').show();
 });
 
@@ -191,8 +198,8 @@ function SendChatMsg() {
   $("#input-chat").val("");
 }
 
-socket.on('chat-msg', function (message) {
-  $('#chatlist').append("<li>" + message + "</li>");
+socket.on('chat-msg', function (packet) {
+  $('#chatlist').append("<li>" + packet.username + ": " + packet.message + "</li>");
   $('#chatlist').scrollTop($('#chatlist').prop("scrollHeight"));
 });
 

@@ -54,12 +54,12 @@ io.on('connection', function (socket) {
 
   socket.on('chat-msg', function (message) {
     if (!!clientroom && "name" in clientroom)
-      io.to(clientroom.name).emit('chat-msg', message);
+      io.to(clientroom.name).emit('chat-msg', { message, username: Players[clientid].username });
       console.log(Players[clientid].username + ":", message);
   });
 
   socket.on('key', function (input) {
-    if (!!clientroom) {
+    try {
       switch(input.inputkey) {
         case 'w':
           clientroom.tetris[clientid].RotatePiece90();
@@ -83,6 +83,8 @@ io.on('connection', function (socket) {
           clientroom.tetris[clientid].RotatePieceMinus90();
           break;
       }
+    } catch (err) {
+      console.log("cant move piece");
     }
   });
   socket.on('startgame', () => {
@@ -114,42 +116,63 @@ io.on('connection', function (socket) {
   });
 });
 
-const piecematrix = [];
-piecematrix[0] = [
-  [1, 0],
-  [1, 1],
-  [1, 0]
-];
-piecematrix[1] = [
-  [2, 2],
-  [2, 0],
-  [2, 0]
-];
-piecematrix[2] = [
-  [3, 0],
-  [3, 0],
-  [3, 3]
-];
-piecematrix[3] = [
-  [0, 4],
-  [4, 4],
-  [4, 0]
-];
-piecematrix[4] = [
-  [5, 5],
-  [5, 5]
-];
-piecematrix[5] = [
-  [0, 6],
-  [0, 6],
-  [0, 6],
-  [0, 6]
-];
-piecematrix[6] = [
-  [7, 0],
-  [7, 7],
-  [0, 7]
-];
+const NORMALTETRO = [];
+  NORMALTETRO[0] = [
+    [1, 0],
+    [1, 1],
+    [1, 0]
+  ];
+  NORMALTETRO[1] = [
+    [2, 2],
+    [2, 0],
+    [2, 0]
+  ];
+  NORMALTETRO[2] = [
+    [3, 0],
+    [3, 0],
+    [3, 3]
+  ];
+  NORMALTETRO[3] = [
+    [0, 4],
+    [4, 4],
+    [4, 0]
+  ];
+  NORMALTETRO[4] = [
+    [5, 5],
+    [5, 5]
+  ];
+  NORMALTETRO[5] = [
+    [0, 6],
+    [0, 6],
+    [0, 6],
+    [0, 6]
+  ];
+  NORMALTETRO[6] = [
+    [7, 0],
+    [7, 7],
+    [0, 7]
+  ];
+const AUTISMTETRO = [];
+  AUTISMTETRO[0] = [
+    [0, 1, 0],
+    [0, 1, 0],
+    [1, 1, 1]
+  ];
+  AUTISMTETRO[1] = [
+    [2, 2, 2],
+    [2, 0, 2],
+    [2, 0, 2]
+  ];
+  AUTISMTETRO[2] = [
+    [3],
+    [3]
+  ];
+  AUTISMTETRO[3] = [
+    [1]
+  ];
+
+let piecematrix = NORMALTETRO;
+// piecematrix = AUTISMTETRO;
 
 function GetPiece() {
   return piecematrix[(Math.random() * piecematrix.length) | 0];
@@ -444,18 +467,23 @@ class Player {
     for (let i = 0; i < this.tetris.height; i++) {
       for (let j = 0; j < this.tetris.width; j++) {
         if (this.matrix[j][i] === 0) break;
-        else if (j === this.tetris.width - 1) this.ClearRow(i, rowscleared++);
+        else if (j === this.tetris.width - 1) {
+          this.ClearRow(i);
+          rowscleared++;
+        };
       }
     }
+    if (rowscleared === 1) this.score += 40;
+    else if (rowscleared === 2) this.score += 100;
+    else if (rowscleared === 3) this.score += 300;
+    else if (rowscleared === 4) this.score += 1200;
   }
-  ClearRow(row, nm) {
+  ClearRow(row) {
     let i = this.tetris.width;
     while (i-- > 0) {
       this.matrix[i].splice(row, 1);
       this.matrix[i].unshift(0);
     }
-    if (nm <= 1) this.score += 100;
-    else this.score += 200;
   }
   // Checks if the piece would obstruct anything if it were to move x, y amount of steps
   CheckForCollision(piece, x, y) {
