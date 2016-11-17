@@ -23,8 +23,8 @@
     <div id="canvases"></div>
     <div id="menu-container">
       <h1>Tetris</h1>
-      <form id="register" style="display: none">
-        <input id="register-input" name="register-input" placeholder="Your name" autocomplete="off" autofocus="true" type="text">
+      <form id="register">
+        <input id="register-input" name="register-input" placeholder="Your name" autocomplete="off" type="text">
         <input class="button stretch" type="submit" name="Enter" value="Enter">
       </form>
     </div>
@@ -40,9 +40,10 @@
     <div id="options-container" style="display:none">
       <div id="options-content">
         <h1>Blockstyles</h1>
-        <input type="radio" name="color" value="Bright"> Bright <br/>
-        <input type="radio" name="color" value="Saturated"> Saturated <br/>
-        <input type="radio" name="color" value="Monochrome"> Monochrome <br/>
+        <!-- buttons for colors -->
+        <input type="radio" name="color" value="bright"> Bright <br/>
+        <input type="radio" name="color" value="autism"> Autism <br/>
+        <input type="radio" name="color" value="monochrome"> Monochrome
       </div>
     </div>
     <div id="gamecontrols">
@@ -54,7 +55,7 @@
       <ul id="chatlist">
         <li>Welcome to Tetris, gay boy</li>
       </ul>
-      <input id="input-chat" autocomplete="off" autofocus="false" type="text">
+      <input id="input-chat" autocomplete="off" type="text">
     </div>
   </body>
 
@@ -67,6 +68,13 @@
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="newclient.js"></script>
   <script type="text/javascript" src="keyhandler.js"></script>
+  <script>
+      $(document).ready(function() {
+     $('#input-chat').blur();
+     $('#register-input').focus();
+    });
+    document.onload
+  </script>
   <!--
         === EMIL AHLBÄCK PROD. ===
               - 1999-2099 -

@@ -2,6 +2,15 @@
 
 let canvases = [], canvasctx = [], selectedRoom;
 
+// let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
+//T, J, L, S, O, I, Z
+const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000'];
+const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan']; // in honor of the brave Samuel Söderberg. support the fight against autism
+const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
+const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
+
+let colors = bright;
+
 $('body').on("click", "#rooms tr.room", function(){
   console.log("clicked");
   selectedRoom = $(this).children().first().html();
@@ -10,10 +19,17 @@ $('body').on("click", "#rooms tr.room", function(){
   UpdateJoinButton();
 });
 $('#options-button').on("click", function(){
-  $("#options-container").show();
-  if (colors == bright)
-    $("options-content > input:nth-child(1)").prop("checked", true);
+  $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();
+  $('input:radio[name=color]').forEach(() => {
+    if (eval("colors == " + $(this).val()))
+      $(this).checked = true;
+  });
 });
+
+$('#options-content > input').click(() => {
+  eval("colors = " + $('input[name=color]:checked').val());
+});
+
 const socket = io();
 
 function RequestRoomInfo () {
@@ -155,15 +171,6 @@ socket.on('packet', packet => {
   });
 });
 const arenaWidth = 10, arenaHeight = 20;
-
-// let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
-//T, J, L, S, O, I, Z
-const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000'];
-const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan']; // in honor of the brave Samuel Söderberg. support the fight against autism
-const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
-const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
-
-let colors = bright;
 
 function DrawMatrix(matrix, canvas, context, piecequeue) {
   context.clearRect(0, 0, canvas.width, canvas.height);

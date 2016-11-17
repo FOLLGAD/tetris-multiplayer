@@ -31,10 +31,14 @@ body {
   width: 200px;
   border: solid 1px black;
   padding: 20px;
-  background: #EED;
   word-break: break-all;
+  color: white;
+}
+#clientcontainer > p {
+  opacity: 1;
 }
 #clientlist {
+  opacity: 1;
   list-style: none;
   padding-left: 0;
 }

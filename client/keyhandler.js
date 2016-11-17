@@ -10,6 +10,9 @@ document.getElementById('input-chat').addEventListener('keydown', e => {
 document.getElementById('input-chat').addEventListener('keyup', e => {
   e.stopPropagation();
 }, false);
+document.getElementById('register-input').addEventListener('keydown', e => {
+  e.stopPropagation();
+}, false);
 
 let intervalStore = {};
 intervalStore.w = -1;
