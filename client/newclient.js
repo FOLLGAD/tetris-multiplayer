@@ -103,8 +103,8 @@ socket.on('initgame', function (packet) {
       myctx = mycanvas.getContext('2d');
       myctx.scale(realscale, realscale);
     }
-    $('#gamecontrols').hide();
   });
+  $('#gamecontrols').hide();
   canvases.push(...$('#canvases > div > canvas'));
   canvases.forEach(elem => canvasctx.push(elem.getContext('2d')));
   canvases.forEach(elem => {
@@ -114,7 +114,6 @@ socket.on('initgame', function (packet) {
   canvasctx.forEach(elem => {
     elem.scale(scale, scale);
   });
-
 });
 socket.on('gameover', winner => {
   $('#gameover-container').show();
@@ -126,6 +125,7 @@ socket.on('gameover', winner => {
 });
 
 function ClearGameState () {
+  $('#maincanvas').empty();
   let deprecatedcanvases = document.getElementById("canvases");
   while(deprecatedcanvases.hasChildNodes()) {
     deprecatedcanvases.removeChild(deprecatedcanvases.firstChild);
@@ -170,11 +170,11 @@ socket.on('packet', packet => {
   let cnv = 0;
   packet.forEach(player => {
     if (player.identity === myidentity) {
-      DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue);
+      DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.live);
       $('#maincanvas > div > ul > .playerName').text(player.username);
       $('#maincanvas > div > ul > .playerScore').text(player.score);
     } else {
-      DrawMatrix(player.matrix, canvases[cnv], canvasctx[cnv], player.pieceQueue);
+      DrawMatrix(player.matrix, canvases[cnv], canvasctx[cnv], player.pieceQueue, player.live);
       $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerName').text(player.username);
       $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerScore').text(player.score);
       cnv++;
@@ -183,7 +183,7 @@ socket.on('packet', packet => {
 });
 const arenaWidth = 10, arenaHeight = 20;
 
-function DrawMatrix(matrix, canvas, context, piecequeue) {
+function DrawMatrix(matrix, canvas, context, piecequeue, live = true) {
   context.clearRect(0, 0, canvas.width, canvas.height);
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {
@@ -202,6 +202,10 @@ function DrawMatrix(matrix, canvas, context, piecequeue) {
         }
       }
     }
+  }
+  if (!live) {
+    context.fillStyle = "rgba(0, 0, 0, 0.6)";
+    context.fillRect(0, 0, arenaWidth + 5, arenaHeight);
   }
 }
 

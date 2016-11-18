@@ -199,3 +199,6 @@ td, th {
 tr:nth-child(even) {
     background-color: #dddddd;
 }
+#canvases, #maincanvas {
+  display: inline-block;
+}

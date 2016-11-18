@@ -7,6 +7,4 @@ Dynamic rotation (move piece to left/right if in tight space), rotate around mid
 Add more modes (Timed, First to X lines, Survival)
 
 TODO: Add timer (for timed mode)
-TODO: Fix canvas order
-TODO: Fix spectating
 TODO: Add support for skins

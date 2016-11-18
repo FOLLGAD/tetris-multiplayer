@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
     if (roomname === -1)
       clientroom = ConnectToNewRoom(clientid);
     else
-      clientroom = ConnectToRoomID(clientid, roomname);
+      clientroom = ConnectToRoomID(clientid, roomname, socket);
     if (!!clientroom && "name" in clientroom) {
       socket.join(clientroom.name);
       io.to(clientroom.name).emit('playerlist', clientroom.players);
@@ -110,7 +110,6 @@ io.on('connection', function (socket) {
     delete Players[clientid];
     if (!!clientroom) {
       DisconnectFromRoom(clientid, clientroom);
-      delete clientroom.tetris[clientid];
       io.to(clientroom.name).emit('playerlist', clientroom.players);
     }
   });
@@ -191,12 +190,20 @@ function ConnectToRoom (id) {
   return Rooms[Rooms.length - 1];
 }
 
-function ConnectToRoomID (id, roomnumber) {
+function ConnectToRoomID (id, roomnumber, socket) {
   for (let room = 0; room < Rooms.length; room++) {
     if (roomnumber == Rooms[room].name) {
       Rooms[room].players.push(Players[id]);
-      if (Rooms[room].active)
-        io.to(id).emit('initgame', { width: 10, height: 20, players: Object.keys(Rooms[room].tetris).length });
+      if (Rooms[room].active) {
+        let deliver = [];
+        for (let id in Rooms[room].tetris) {
+          const i = deliver.push({}) - 1;
+          deliver[i].score = Rooms[room].tetris[id].score;
+          deliver[i].username = Players[id].username;
+          deliver[i].identity = Players[id].identity;
+        }
+        socket.emit('initgame', { width: 10, height: 20, players: deliver });
+      }
       return Rooms[room];
     }
   }
@@ -212,9 +219,8 @@ function ConnectToNewRoom (id) {
 function DisconnectFromRoom(id, room) {
   for (let p = 0; p < room.players.length; p++) {
     if (room.players[p].id === id) {
-      delete room.tetris[id];
-      let indx = room.players.indexOf(room.players[p]);
-      room.players.splice(indx, 1);
+      room.tetris[id].Death();
+      room.players.splice(p, 1);
       if (room.players.length <= 0) Rooms.splice(Rooms.indexOf(room), 1);
       return;
     }
@@ -233,11 +239,13 @@ class RoomClass {
     this.winlist = [];
     this.type = 'single';
     this.droprate = 1000;
+    this.gameLength = 300000;
+    // timed mode game length in ms
   }
   Start () {
     if (this.players.length === 0 || this.active) return false;
     if (this.players.length === 1) this.type = 'single';
-    else this.type = 'multi';
+    else this.type = 'timed';
     this.active = true;
     this.tetris = {};
     for (let i = 0; i < this.players.length; i++) {
@@ -252,6 +260,8 @@ class RoomClass {
     }
     io.to(this.name).emit('initgame', { width: 10, height: 20, players: deliver });
     this.startingTime = Date.now();
+    if (this.type == "timed")
+      this.endingTime = Date.now() + this.gameLength;
   }
   Update() {
     let dt = Date.now() - this.startingTime;
@@ -274,16 +284,20 @@ class RoomClass {
     this.startingTime = 0;
   }
   SendPackets() {
+    let time = this.endingTime;
     let deliver = [];
     for (let id in this.tetris) {
       const i = deliver.push({}) - 1;
       deliver[i].matrix = this.tetris[id].DrawMatrix();
       deliver[i].pieceQueue = this.tetris[id].pieceQueue;
       deliver[i].score = this.tetris[id].score;
-      deliver[i].username = Players[id].username;
-      deliver[i].identity = Players[id].identity;
+      deliver[i].live = this.tetris[id].live;
+      if (id in Players) {
+        deliver[i].username = Players[id].username;
+        deliver[i].identity = Players[id].identity;
+      }
     }
-    io.to(this.name).emit('packet', deliver);
+    io.to(this.name).emit('packet', { deliver, time });
   }
 }
 
@@ -315,7 +329,6 @@ class Player {
     this.tetris = tetris;
     this.matrix = tetris.matrix;
     this.score = 0;
-    this.lastTime = Date.now();
     this.dropCounter = 0;
     this.live = true;
     this.piece = [];
@@ -445,8 +458,6 @@ class Player {
   }
   TickPiece(dt) {
     if (this.live) {
-      // let dt = Date.now() - this.lastTime;
-      this.lastTime = Date.now();
       this.dropCounter += dt;
       while (this.dropCounter > this.droprate) {
         this.MoveDown(1);
