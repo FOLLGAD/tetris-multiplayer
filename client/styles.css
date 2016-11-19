@@ -189,7 +189,6 @@ table {
     border-collapse: collapse;
     width: 100%;
 }
-
 td, th {
     border: 1px solid #dddddd;
     text-align: left;
@@ -201,4 +200,16 @@ tr:nth-child(even) {
 }
 #canvases, #maincanvas {
   display: inline-block;
+}
+#time {
+  position: fixed;
+  bottom: 20px;
+  text-align: center;
+  width: 400px;
+  left: 50%;
+  margin-left: -200px;
+}
+#time > p {
+  text-align: center;
+  font-size: 64px;
 }

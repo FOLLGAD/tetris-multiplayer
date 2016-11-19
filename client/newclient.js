@@ -22,8 +22,9 @@ $('body').on("click", "#rooms tr.room", function(){
 $('#options-button').on("click", function(){
   $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();
   $('input:radio[name=color]').each(() => {
-    if (colors == colorthemes[$(this).val()])
+    if (colors == colorthemes[$(this).value])
       $(this).checked = true;
+      console.log($(this).value);
   });
 });
 
@@ -118,7 +119,9 @@ socket.on('initgame', function (packet) {
 socket.on('gameover', winner => {
   $('#gameover-container').show();
   if (winner === -1)
-    $('#gameover-content h1').html("You lost.");
+    $('#gameover-content h1').html("You lost");
+  else if (winner === -2)
+    $('#gameover-content h1').html("Game over");
   else
     $('#gameover-content h1').html(winner + " wins!");
   $('#gamecontrols').show();
@@ -126,6 +129,7 @@ socket.on('gameover', winner => {
 
 function ClearGameState () {
   $('#maincanvas').empty();
+  $('#time > p').empty();
   let deprecatedcanvases = document.getElementById("canvases");
   while(deprecatedcanvases.hasChildNodes()) {
     deprecatedcanvases.removeChild(deprecatedcanvases.firstChild);
@@ -141,9 +145,10 @@ function ClearGameState () {
 let myid;
 
 socket.on('registerrequest', id => {
+  ClearGameState();
   myid = id.clientid;
   myidentity = id.identity;
-  $('#register').show();
+  $('#menu-container').show();
 });
 
 $("form").submit(e => {
@@ -153,7 +158,7 @@ $("form").submit(e => {
   name = $('#register-input').val();
   else name = 'Unknown Tetro';
   socket.emit('register', name);
-  $('#register').hide();
+  $('#menu-container').hide();
   socket.emit('requestrooms');
 });
 
@@ -168,7 +173,12 @@ socket.on('playerlist', playersarray => {
 
 socket.on('packet', packet => {
   let cnv = 0;
-  packet.forEach(player => {
+  if (!!packet.time) {
+    let time = (packet.time - Date.now()) / 1000, mins = ((time)/60)|0, secs = ((time%60) | 0);
+    if (secs < 10) secs = "0" + secs;
+    $('#time > p').text(mins + ':' + secs);
+  }
+  packet.deliver.forEach(player => {
     if (player.identity === myidentity) {
       DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.live);
       $('#maincanvas > div > ul > .playerName').text(player.username);
@@ -226,3 +236,5 @@ socket.on('chat-msg', function (packet) {
 });
 
 const DispOwner = e => console.warn(e);
+
+console.log('Welcome to \n__/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\___/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_____/\\\\\\\\\\\\\\\\\\_______/\\\\\\\\\\\\\\\\\\\\\\______/\\\\\\\\\\\\\\\\\\\\\\___\n _\\///////\\\\\\/////___\\/\\\\\\///////////___\\///////\\\\\\/////____/\\\\\\///////\\\\\\____\\/////\\\\\\///_____/\\\\\\/////////\\\\\\_\n  _______\\/\\\\\\________\\/\\\\\\____________________\\/\\\\\\________\\/\\\\\\_____\\/\\\\\\________\\/\\\\\\_______\\//\\\\\\______\\///__\n   _______\\/\\\\\\________\\/\\\\\\\\\\\\\\\\\\\\\\____________\\/\\\\\\________\\/\\\\\\\\\\\\\\\\\\\\\\/_________\\/\\\\\\________\\////\\\\\\_________\n    _______\\/\\\\\\________\\/\\\\\\///////_____________\\/\\\\\\________\\/\\\\\\//////\\\\\\_________\\/\\\\\\___________\\////\\\\\\______\n     _______\\/\\\\\\________\\/\\\\\\____________________\\/\\\\\\________\\/\\\\\\____\\//\\\\\\________\\/\\\\\\______________\\////\\\\\\___\n      _______\\/\\\\\\________\\/\\\\\\____________________\\/\\\\\\________\\/\\\\\\_____\\//\\\\\\_______\\/\\\\\\_______/\\\\\\______\\//\\\\\\__\n       _______\\/\\\\\\________\\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\________\\/\\\\\\________\\/\\\\\\______\\//\\\\\\___/\\\\\\\\\\\\\\\\\\\\\\__\\///\\\\\\\\\\\\\\\\\\\\\\/___\n        _______\\///_________\\///////////////_________\\///_________\\///________\\///___\\///////////_____\\///////////_____');

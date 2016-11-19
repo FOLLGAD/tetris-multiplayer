@@ -239,13 +239,15 @@ class RoomClass {
     this.winlist = [];
     this.type = 'single';
     this.droprate = 1000;
-    this.gameLength = 300000;
+    this.gameLength = 300*1000;
     // timed mode game length in ms
   }
   Start () {
+    console.log(this.players.length);
     if (this.players.length === 0 || this.active) return false;
     if (this.players.length === 1) this.type = 'single';
     else this.type = 'timed';
+    console.log(this.type);
     this.active = true;
     this.tetris = {};
     for (let i = 0; i < this.players.length; i++) {
@@ -263,7 +265,26 @@ class RoomClass {
     if (this.type == "timed")
       this.endingTime = Date.now() + this.gameLength;
   }
+  CheckWinner() {
+    let winner, scores = [];
+    for (let id in this.tetris) {
+      if (!this.tetris[id].live) continue;
+      scores.push({id, score: this.tetris[id].score});
+    }
+    scores.sort((a, b) => {
+      return b.score - a.score;
+    });
+    if (!!scores[1] && scores[0].score !== scores[1].score)
+      winner = Players[scores[0].id].username;
+    else if (!!scores[0] && scores.length === 1)
+      winner = Players[scores[0].id].username;
+    this.Stop(winner);
+  }
   Update() {
+    if (this.type == 'timed' && Date.now() > this.endingTime) {
+      this.CheckWinner();
+      return;
+    }
     let dt = Date.now() - this.startingTime;
     let level = (dt / 20000) | 0;
     let speed = ((1 + 0.1 * level) * 100) | 0;
@@ -279,13 +300,13 @@ class RoomClass {
     this.SendPackets();
   }
   Stop(winner = -1) {
+    if (this.type == 'single') winner = -2;
     this.active = false;
     io.to(this.name).emit('gameover', winner);
     this.startingTime = 0;
   }
   SendPackets() {
-    let time = this.endingTime;
-    let deliver = [];
+    let time = this.endingTime, deliver = [];
     for (let id in this.tetris) {
       const i = deliver.push({}) - 1;
       deliver[i].matrix = this.tetris[id].DrawMatrix();
@@ -297,7 +318,10 @@ class RoomClass {
         deliver[i].identity = Players[id].identity;
       }
     }
-    io.to(this.name).emit('packet', { deliver, time });
+    if (this.type == 'timed')
+      io.to(this.name).emit('packet', { deliver, time });
+    else
+      io.to(this.name).emit('packet', { deliver });
   }
 }
 
@@ -309,7 +333,6 @@ class Tetris {
     this.ClearMatrix();
   }
   Init() {
-    this.score = 0;
     this.ClearMatrix();
   }
   ClearMatrix() {
