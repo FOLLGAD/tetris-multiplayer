@@ -5,6 +5,8 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
+let arenaWidth = 10, arenaHeight = 20;
+
 app.use(express.static(__dirname + '/client/'));
 app.get('/', function(req, res, next) {
   res.sendFile(__dirname + '/client/index.html');
@@ -14,14 +16,7 @@ const port = 8080;
 server.listen(port);
 console.log("server is listening on port", port);
 
-let Piece = function (x = 5, y = 0) {
-  this.matrix = GetPiece();
-  this.x = x - Math.floor(this.matrix[0].length / 2);
-  this.y = y;
-};
-
-let Players = {};
-let Rooms = [];
+let Players = {}, Rooms = [];
 
 io.on('connection', function (socket) {
   console.log('Client connected with ID:', socket.id);
@@ -173,7 +168,16 @@ const AUTISMTETRO = [];
 let piecematrix = NORMALTETRO;
 // piecematrix = AUTISMTETRO;
 
-function GetPiece() {
+let Piece = function (x, n) {
+  // if (!n)
+  //   this.matrix = GetRandomPiece();
+  // else
+  this.matrix = piecematrix[n];
+  this.x = x - Math.floor(this.matrix[0].length / 2);
+  this.y = 0;
+};
+
+function GetRandomPiece() {
   return piecematrix[(Math.random() * piecematrix.length) | 0];
 }
 
@@ -211,12 +215,14 @@ function ConnectToRoomID (id, roomnumber, socket) {
 }
 
 function ConnectToNewRoom (id) {
-  Rooms.push(new RoomClass());
-  Rooms[Rooms.length - 1].players.push(Players[id]);
-  return Rooms[Rooms.length - 1];
+  let indx = Rooms.push(new RoomClass());
+  Rooms[indx - 1].players.push(Players[id]);
+  Rooms[indx - 1].owner = Players[id];
+  return Rooms[indx - 1];
 }
 
 function DisconnectFromRoom(id, room) {
+  if (id === room.owner) room.owner = room.players[0].id;
   for (let p = 0; p < room.players.length; p++) {
     if (room.players[p].id === id) {
       room.tetris[id].Death();
@@ -227,8 +233,10 @@ function DisconnectFromRoom(id, room) {
   }
 }
 
-// tetris is an object holding all current instances in a 'room'
-let tetris = {};
+// generates a seed that is used to generate the same pieces for all users
+const getNewSeed = () => {
+  return Math.floor(Math.random() * 100000);
+};
 
 class RoomClass {
   constructor () {
@@ -240,18 +248,18 @@ class RoomClass {
     this.type = 'single';
     this.droprate = 1000;
     this.gameLength = 300*1000;
+    this.seed = null;
     // timed mode game length in ms
   }
   Start () {
-    console.log(this.players.length);
     if (this.players.length === 0 || this.active) return false;
     if (this.players.length === 1) this.type = 'single';
     else this.type = 'timed';
-    console.log(this.type);
     this.active = true;
+    this.seed = getNewSeed();
     this.tetris = {};
     for (let i = 0; i < this.players.length; i++) {
-      this.tetris[this.players[i].id] = new Player(new Tetris());
+      this.tetris[this.players[i].id] = new Player(this.seed);
     }
     let deliver = [];
     for (let id in this.tetris) {
@@ -325,7 +333,6 @@ class RoomClass {
   }
 }
 
-let arenaWidth = 10, arenaHeight = 20;
 class Tetris {
   constructor() {
     this.width = arenaWidth;
@@ -347,20 +354,22 @@ class Tetris {
 }
 
 class Player {
-  constructor(tetris = new Tetris()) {
+  constructor(seed, tetris = new Tetris()) {
+    this.n = 0;
+    this.seed = seed;
     this.droprate = 1000;
     this.tetris = tetris;
     this.matrix = tetris.matrix;
     this.score = 0;
     this.dropCounter = 0;
     this.live = true;
-    this.piece = [];
+    this.piece = null;
     this.pieceQueue = [];
     this.NewPiece();
   }
   NewPiece () {
     while (this.pieceQueue.length < 6) {
-      this.pieceQueue.push(new Piece(this.tetris.width / 2));
+      this.pieceQueue.push(new Piece(this.tetris.width / 2, this.getPieceNumber()));
     }
     this.piece = this.pieceQueue.splice(0, 1)[0];
   }
@@ -403,9 +412,7 @@ class Player {
   // takes in a piece of any size, rotates it 90 degrees clockwise and then returns as an array
   RotatePiece90() {
     if (!this.live) return;
-    let n = this.piece.matrix.length;
-    let n2 = this.piece.matrix[0].length;
-    let pp = {};
+    let n = this.piece.matrix.length, n2 = this.piece.matrix[0].length, pp = {};
     pp.matrix = [];
     for (let i = 0; i < n2; i++) {
       pp.matrix.push([]);
@@ -544,6 +551,11 @@ class Player {
     }
     return false;
   }
+  getPieceNumber() {
+    let x = Math.sin(this.seed + this.n) * 1000000;
+    this.n++;
+    return ((x - Math.floor(x)) * 7) | 0;
+  }
 }
 
 function Update() {
@@ -552,9 +564,6 @@ function Update() {
       element.Update();
     }
   });
-  for (let id in tetris) {
-    tetris[id].TickPiece();
-  }
 }
 
 setInterval(Update, 1000/30);
