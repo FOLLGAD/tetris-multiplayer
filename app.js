@@ -225,7 +225,8 @@ function DisconnectFromRoom(id, room) {
   if (id === room.owner) room.owner = room.players[0].id;
   for (let p = 0; p < room.players.length; p++) {
     if (room.players[p].id === id) {
-      room.tetris[id].Death();
+      if (id in room.tetris)
+        room.tetris[id].Death();
       room.players.splice(p, 1);
       if (room.players.length <= 0) Rooms.splice(Rooms.indexOf(room), 1);
       return;
@@ -247,7 +248,7 @@ class RoomClass {
     this.winlist = [];
     this.type = 'single';
     this.droprate = 1000;
-    this.gameLength = 300*1000;
+    this.gameLength = 120*1000;
     this.seed = null;
     // timed mode game length in ms
   }
