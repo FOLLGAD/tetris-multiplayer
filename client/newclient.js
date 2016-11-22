@@ -5,10 +5,10 @@ let canvases = [], canvasctx = [], mycanvas, myctx, selectedRoom;
 
 // let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
 //T, J, L, S, O, I, Z
-const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000'];
-const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan']; // in honor of the brave Samuel Söderberg. support the fight against autism
-const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646'];
-const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', "#EEE", "#888"];
+const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000', 'beige'];
+const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan', 'beige']; // in honor of the brave Samuel Söderberg. support the fight against autism
+const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646', 'beige'];
+const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', 'beige'];
 
 const colorthemes = { bright, autism, monochrome, monochromeold };
 let colors = colorthemes.bright;
@@ -88,7 +88,6 @@ socket.on('initgame', function (packet) {
       realscale = scale;
       canvasid = '#canvases';
     }
-
     // creates a new canvas element with class tetrisCanvas
     $(canvasid).append('<div class="other-player"></div>');
     $(canvasid + ' > div:last').append('<canvas class="tetrisCanvas"></canvas>');
@@ -172,13 +171,17 @@ socket.on('playerlist', playersarray => {
 });
 
 socket.on('packet', packet => {
+  debugger;
   let cnv = 0;
-  if (!!packet.time) {
+  if (packet.time !== null) {
     let time = (packet.time - Date.now()) / 1000, mins = ((time)/60)|0, secs = ((time%60) | 0);
     if (secs < 10) secs = "0" + secs;
+    secs = secs < 10 ? '0' + secs : secs;
     $('#time > p').text(mins + ':' + secs);
   }
+  console.log(packet.deliver[0].matrix);
   packet.deliver.forEach(player => {
+    console.log(player.matrix);
     if (player.identity === myidentity) {
       DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.activePiece, player.live);
       $('#maincanvas > div > ul > .playerName').text(player.username);
@@ -194,6 +197,15 @@ socket.on('packet', packet => {
 
 function DrawPiece(piece, matrix) {
   if (piece !== null) {
+    let ghost = ShadeDrop(piece, matrix);
+    for (let i = 0; i < ghost.matrix.length; i++) {
+      for (let j = 0; j < ghost.matrix[i].length; j++) {
+        if (ghost.matrix[i][j] !== 0) {
+          console.log(matrix[i + ghost.x]);
+          matrix[i + ghost.x][j + ghost.y] = 8;
+        }
+      }
+    }
     for (let i = 0; i < piece.matrix.length; i++) {
       for (let j = 0; j < piece.matrix[i].length; j++) {
         if (piece.matrix[i][j] !== 0) {
@@ -205,14 +217,39 @@ function DrawPiece(piece, matrix) {
   return matrix;
 }
 
-const CalcDrop = (piece, matrix) => {
-    
-}
+const ShadeDrop = (piece, matrix) => {
+  ghost = Object.assign({}, piece);
+  let i = 0;
+  while (!CheckCollision(ghost, matrix)) {
+    ghost.y++;
+    console.log(i++);
+  }
+  ghost.y -= 1;
+  return ghost;
+};
+
+const CheckCollision = (piece, matrix) => {
+  for (let i = 0; i < piece.matrix.length; i++) {
+    for (let j = 0; j < piece.matrix[i].length; j++) {
+      if (piece.matrix[i][j] !== 0) {
+        if (typeof matrix[i + piece.x] == 'undefined' || typeof matrix[i + piece.x][j + piece.y] == 'undefined') {
+          return true;
+        }
+        else if (matrix[i + piece.x][j + piece.y] !== 0 && piece.matrix[i][j] !== 0) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
 
 const arenaWidth = 10, arenaHeight = 20;
 
 function DrawMatrix(matrix, canvas, context, piecequeue, piece, live = true) {
-  matrix = DrawPiece(piece, matrix);
+  if (piece != 'undefined') {
+    matrix = DrawPiece(piece, matrix);
+  }
   context.clearRect(0, 0, canvas.width, canvas.height);
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {
