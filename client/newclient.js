@@ -180,20 +180,39 @@ socket.on('packet', packet => {
   }
   packet.deliver.forEach(player => {
     if (player.identity === myidentity) {
-      DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.live);
+      DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.activePiece, player.live);
       $('#maincanvas > div > ul > .playerName').text(player.username);
       $('#maincanvas > div > ul > .playerScore').text(player.score);
     } else {
-      DrawMatrix(player.matrix, canvases[cnv], canvasctx[cnv], player.pieceQueue, player.live);
+      DrawMatrix(player.matrix, canvases[cnv], canvasctx[cnv], player.pieceQueue, player.activePiece, player.live);
       $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerName').text(player.username);
       $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerScore').text(player.score);
       cnv++;
     }
   });
 });
+
+function DrawPiece(piece, matrix) {
+  if (piece !== null) {
+    for (let i = 0; i < piece.matrix.length; i++) {
+      for (let j = 0; j < piece.matrix[i].length; j++) {
+        if (piece.matrix[i][j] !== 0) {
+          matrix[i + piece.x][j + piece.y] = piece.matrix[i][j];
+        }
+      }
+    }
+  }
+  return matrix;
+}
+
+const CalcDrop = (piece, matrix) => {
+    
+}
+
 const arenaWidth = 10, arenaHeight = 20;
 
-function DrawMatrix(matrix, canvas, context, piecequeue, live = true) {
+function DrawMatrix(matrix, canvas, context, piecequeue, piece, live = true) {
+  matrix = DrawPiece(piece, matrix);
   context.clearRect(0, 0, canvas.width, canvas.height);
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {

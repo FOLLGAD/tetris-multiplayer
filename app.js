@@ -319,6 +319,7 @@ class RoomClass {
     for (let id in this.tetris) {
       const i = deliver.push({}) - 1;
       deliver[i].matrix = this.tetris[id].DrawMatrix();
+      deliver[i].activePiece = this.tetris[id].piece;
       deliver[i].pieceQueue = this.tetris[id].pieceQueue;
       deliver[i].score = this.tetris[id].score;
       deliver[i].live = this.tetris[id].live;
@@ -398,7 +399,6 @@ class Player {
         toDeliver[i][o] = this.matrix[i][o];
       }
     }
-    toDeliver = this.DrawPiece(toDeliver);
     return toDeliver;
   }
   // Move piece
