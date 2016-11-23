@@ -195,13 +195,19 @@ socket.on('packet', packet => {
   });
 });
 
+function HextoRGB(hex) {
+  let r = parseInt(hex.slice(1, 3), 16);
+  let g = parseInt(hex.slice(3, 5), 16);
+  let b = parseInt(hex.slice(5, 7), 16);
+  return [r, g, b];
+}
+
 function DrawPiece(piece, matrix) {
   if (piece !== null) {
     let ghost = ShadeDrop(piece, matrix);
     for (let i = 0; i < ghost.matrix.length; i++) {
       for (let j = 0; j < ghost.matrix[i].length; j++) {
         if (ghost.matrix[i][j] !== 0) {
-          console.log(matrix[i + ghost.x]);
           matrix[i + ghost.x][j + ghost.y] = 8;
         }
       }
