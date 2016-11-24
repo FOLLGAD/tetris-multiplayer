@@ -80,21 +80,24 @@ function LeaveRoom () {
   $('#roomselector-content').show();
 }
 
+let canvassize = 16, scale = 1;
+
 // Create a number of canvases
 socket.on('initgame', function (packet) {
   ClearGameState();
   $('#roomselector-container').hide();
   $('#gameover-container').hide();
-  let scale = 20;
   packet.players.forEach(player => {
-    let realscale, canvasid;
+    let mycanvassize, myscale, canvasid;
     // sets scale to times two if it is your canvas
     if (player.identity == myidentity) {
-      realscale = scale * 2;
+      mycanvassize = canvassize * 2;
+      myscale = scale * 2;
       canvasid = '#maincanvas';
     } else {
-      realscale = scale;
       canvasid = '#canvases';
+      mycanvassize = canvassize;
+      myscale = scale;
     }
     // creates a new canvas element with class tetrisCanvas
     $(canvasid).append('<div class="other-player"></div>');
@@ -105,10 +108,10 @@ socket.on('initgame', function (packet) {
     // arrays for easy later access
     if (player.identity == myidentity) {
       mycanvas = $('#maincanvas > div > canvas')[0];
-      mycanvas.width = (packet.width + 5) * realscale;
-      mycanvas.height = packet.height * realscale;
+      mycanvas.width = (packet.width + 5) * mycanvassize;
+      mycanvas.height = packet.height * mycanvassize;
       myctx = mycanvas.getContext('2d');
-      myctx.scale(realscale, realscale);
+      myctx.scale(myscale, myscale);
     }
   });
   $('#gamecontrols').hide();
@@ -167,8 +170,9 @@ $("form").submit(e => {
   e.preventDefault();
   let name;
   if ($('#register-input').val() !== '')
-  name = $('#register-input').val();
-  else name = 'Unknown Tetro';
+    name = $('#register-input').val();
+  else
+    name = 'Unknown Tetro';
   socket.emit('register', name);
   $('#menu-container').hide();
   socket.emit('requestrooms');
@@ -187,7 +191,7 @@ socket.on('playerlist', playersarray => {
 socket.on('packet', packet => {
   let cnv = 0;
   if (packet.time !== null) {
-    let time = (packet.time - Date.now()) / 1000, mins = ((time)/60)|0, secs = ((time%60) | 0);
+    let time = (packet.time - Date.now()) / 1000, mins = ((time) / 60) | 0, secs = ((time % 60) | 0);
     if (secs < 10) secs = "0" + secs;
     secs = secs < 10 ? '0' + secs : secs;
     $('#time > p').text(mins + ':' + secs);
@@ -270,24 +274,27 @@ function DrawMatrix(matrix, canvas, context, piecequeue, piece, live = true) {
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {
       context.fillStyle = colors[value];
-      context.fillRect(x, y, 1, 1);
+      if (value != 8)
+        context.fillRect(x * canvassize, y * canvassize, 1 * canvassize, 1 * canvassize);
+      else
+        context.fillRect(x * canvassize, y * canvassize, 1 * canvassize, 1 * canvassize);
     });
   });
   context.fillStyle = "#333";
-  context.fillRect(arenaWidth, 0, 5, arenaHeight);
+  context.fillRect(arenaWidth * canvassize, 0, 5 * canvassize, arenaHeight * canvassize);
   for (let index = 0; index < piecequeue.length; index++) {
     for (let i = 0; i < piecequeue[index].matrix.length; i++) {
       for (let o = 0; o < piecequeue[index].matrix[i].length; o++) {
         if (piecequeue[index].matrix[i][o] !== 0) {
           context.fillStyle = colors[piecequeue[index].matrix[i][o]];
-          context.fillRect(i + arenaWidth + 1, o + index * 4 + 1, 1, 1);
+          context.fillRect((i + arenaWidth + 1) * canvassize, (o + index * 4 + 1) * canvassize, canvassize, canvassize);
         }
       }
     }
   }
   if (!live) {
     context.fillStyle = "rgba(0, 0, 0, 0.6)";
-    context.fillRect(0, 0, arenaWidth + 5, arenaHeight);
+    context.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
 
