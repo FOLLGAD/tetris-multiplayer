@@ -15,8 +15,8 @@
     </div>
     <div id="time"><p></p></div>
     <div id="scoreboard"></div>
-    <div id="clientcontainer">
-      Players:
+    <div id="clientcontainer" style="display:none">
+      Players
       <ul id="clientlist">
       </ul>
     </div>
@@ -29,13 +29,16 @@
         <input class="button stretch" type="submit" name="Enter" value="Enter">
       </form>
     </div>
-    <div id="roomselector-container">
+    <div id="roomselector-container" style="display: none">
       <div id="roomselector-content">
         <table id="rooms"></table>
       </div>
-      <div style="display:none" id="startgame-container">
-        <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
-        <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
+      <div id="startgame-container" style="display:none">
+            <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+            <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
+          <div id="gamesettings">
+            <h3>Game Settings</h3>
+          </div>
       </div>
     </div>
     <div id="options-container" style="display:none">

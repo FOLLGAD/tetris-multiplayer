@@ -45,15 +45,21 @@ function UpdateJoinButton(){
   }
 }
 socket.on('roominfo', function (roominfo) {
+  $('#roomselector-container').show();
   $('#roomselector-content').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
   $('#roomselector-content table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
   UpdateJoinButton();
-  roominfo.forEach(element => {
-    $('#roomselector-content table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
-    $('#join-room').click(() => {
-      JoinGame(selectedRoom);
+  if(roominfo.length < 1){   
+      $('#roomselector-content table').html('<h1 class="center">There are no rooms!</h1>');
+  }else{
+      roominfo.forEach(element => {
+      $('#roomselector-content table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
+      $('#join-room').click(() => {
+        JoinGame(selectedRoom);
+      });
     });
-  });
+  }
+
   $('#create-room').click(() => {
     JoinGame(-1);
   });
@@ -63,12 +69,14 @@ socket.on('roominfo', function (roominfo) {
 });
 
 function JoinGame (roomname) {
+  $('#clientcontainer').show();
   socket.emit('joinroom', roomname);
 }
 
 function LeaveRoom () {
   socket.emit('requestrooms');
   $('#startgame-container').hide();
+  $('#clientcontainer').hide();
   $('#roomselector-content').show();
 }
 
