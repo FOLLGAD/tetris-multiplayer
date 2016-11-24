@@ -260,7 +260,7 @@ class RoomClass {
     this.seed = getNewSeed();
     this.tetris = {};
     for (let i = 0; i < this.players.length; i++) {
-      this.tetris[this.players[i].id] = new Player(this.seed);
+      this.tetris[this.players[i].id] = new Player(this.seed, this.players[i].username);
     }
     let deliver = [];
     for (let id in this.tetris) {
@@ -289,6 +289,16 @@ class RoomClass {
       winner = Players[scores[0].id].username;
     this.Stop(winner);
   }
+  ScoreList() {
+    let scores = [];
+    for (let id in this.tetris) {
+      scores.push({ username: this.tetris[id].username, score: this.tetris[id].score });
+    }
+    scores.sort((a, b) => {
+      return b.score - a.score;
+    });
+    return scores;
+  }
   Update() {
     if (this.type == 'timed' && Date.now() > this.endingTime) {
       this.CheckWinner();
@@ -308,10 +318,10 @@ class RoomClass {
     else if (livecount.length === 0) this.Stop();
     this.SendPackets();
   }
-  Stop(winner = -1) {
-    if (this.type == 'single') winner = -2;
+  Stop() {
+    let results = this.ScoreList();
     this.active = false;
-    io.to(this.name).emit('gameover', winner);
+    io.to(this.name).emit('gameover', results);
     this.startingTime = 0;
   }
   SendPackets() {
@@ -356,17 +366,18 @@ class Tetris {
 }
 
 class Player {
-  constructor(seed, tetris = new Tetris()) {
+  constructor(seed, username) {
     this.n = 0;
     this.seed = seed;
     this.droprate = 1000;
-    this.tetris = tetris;
-    this.matrix = tetris.matrix;
+    this.tetris = new Tetris();
+    this.matrix = this.tetris.matrix;
     this.score = 0;
     this.dropCounter = 0;
     this.live = true;
     this.piece = null;
     this.pieceQueue = [];
+    this.username = username;
     this.NewPiece();
   }
   NewPiece () {

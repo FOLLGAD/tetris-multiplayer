@@ -114,14 +114,20 @@ socket.on('initgame', function (packet) {
     elem.scale(scale, scale);
   });
 });
-socket.on('gameover', winner => {
+socket.on('gameover', results => {
+  console.log(results);
+  let gameovermsg, i = 1;
   $('#gameover-container').show();
-  if (winner === -1)
-    $('#gameover-content h1').html("You lost");
-  else if (winner === -2)
-    $('#gameover-content h1').html("Game over");
+  if (!!results[0].score && !!results[1].score && results[0].score == results[1].score)
+    gameovermsg = "There was a tie!";
   else
-    $('#gameover-content h1').html(winner + " wins!");
+    gameovermsg = results[0].username + " won the game!";
+  $('#gameover-content p').html('<p>'+ gameovermsg +'</p><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
+  results.forEach(element => {
+    $('#gameover-content table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
+    console.log(element.username, element.score);
+  });
+  $('#gameover-content p').append('</table>');
   $('#gamecontrols').show();
 });
 
@@ -171,7 +177,6 @@ socket.on('playerlist', playersarray => {
 });
 
 socket.on('packet', packet => {
-  debugger;
   let cnv = 0;
   if (packet.time !== null) {
     let time = (packet.time - Date.now()) / 1000, mins = ((time)/60)|0, secs = ((time%60) | 0);
@@ -179,9 +184,7 @@ socket.on('packet', packet => {
     secs = secs < 10 ? '0' + secs : secs;
     $('#time > p').text(mins + ':' + secs);
   }
-  console.log(packet.deliver[0].matrix);
   packet.deliver.forEach(player => {
-    console.log(player.matrix);
     if (player.identity === myidentity) {
       DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.activePiece, player.live);
       $('#maincanvas > div > ul > .playerName').text(player.username);
@@ -228,7 +231,6 @@ const ShadeDrop = (piece, matrix) => {
   let i = 0;
   while (!CheckCollision(ghost, matrix)) {
     ghost.y++;
-    console.log(i++);
   }
   ghost.y -= 1;
   return ghost;
