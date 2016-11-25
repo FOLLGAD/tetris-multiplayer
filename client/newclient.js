@@ -13,6 +13,17 @@ const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '
 const colorthemes = { bright, autism, monochrome, monochromeold };
 let colors = colorthemes.bright;
 
+const blockset = {};
+blockset.default = [];
+
+['default', 'autism', 'monochrome'].forEach(setname => {
+  for (let i = 0; i < 9; i++) {
+    blockset[setname][i] = new Image();
+    blockset[setname][i].src = '/skins/' + setname + '/' + i + '.png';
+  }
+});
+
+
 $('body').on("click", "#rooms tr.room", function(){
   selectedRoom = $(this).children().first().html();
   $(this).css({backgroundColor: "green"});
@@ -49,7 +60,7 @@ socket.on('roominfo', function (roominfo) {
   $('#roomselector-content').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
   $('#roomselector-content table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
   UpdateJoinButton();
-  if(roominfo.length < 1){   
+  if(roominfo.length < 1){
       $('#roomselector-content table').html('<h1 class="center">There are no rooms!</h1>');
   }else{
       roominfo.forEach(element => {
@@ -118,15 +129,14 @@ socket.on('initgame', function (packet) {
   canvases.push(...$('#canvases > div > canvas'));
   canvases.forEach(elem => canvasctx.push(elem.getContext('2d')));
   canvases.forEach(elem => {
-    elem.width = (packet.width + 5) * scale;
-    elem.height = packet.height * scale;
+    elem.width = (packet.width + 5) * canvassize;
+    elem.height = packet.height * canvassize;
   });
   canvasctx.forEach(elem => {
     elem.scale(scale, scale);
   });
 });
 socket.on('gameover', results => {
-  console.log(results);
   let gameovermsg, i = 1;
   $('#gameover-container').show();
   if (!!results[0].score && !!results[1].score && results[0].score == results[1].score)
@@ -136,7 +146,6 @@ socket.on('gameover', results => {
   $('#gameover-content p').html('<p>'+ gameovermsg +'</p><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
   results.forEach(element => {
     $('#gameover-content table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
-    console.log(element.username, element.score);
   });
   $('#gameover-content p').append('</table>');
   $('#gamecontrols').show();
@@ -275,9 +284,14 @@ function DrawMatrix(matrix, canvas, context, piecequeue, piece, live = true) {
     col.forEach((value, y) => {
       context.fillStyle = colors[value];
       if (value != 8)
-        context.fillRect(x * canvassize, y * canvassize, 1 * canvassize, 1 * canvassize);
-      else
-        context.fillRect(x * canvassize, y * canvassize, 1 * canvassize, 1 * canvassize);
+        context.fillRect(x * canvassize, y * canvassize, canvassize, canvassize);
+      else {
+        context.beginPath();
+        context.rect(x * canvassize, y * canvassize, canvassize, canvassize);
+        context.rect((x + 0.1) * canvassize, (y + 0.1) * canvassize, 0.8 * canvassize, 0.8 * canvassize);
+        context.fill("evenodd");
+        context.closePath();
+      }
     });
   });
   context.fillStyle = "#333";
