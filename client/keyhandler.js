@@ -60,10 +60,10 @@ function keyDownHandler(e) {
       socket.emit('key', { inputkey: 'space', state: true });
       break;
     case 'KeyZ':
-      socket.emit('key', { inputkey: 'rotate90' });
+      socket.emit('key', { inputkey: 'rotateminus90' });
       break;
     case 'KeyX':
-      socket.emit('key', { inputkey: 'rotateminus90' });
+      socket.emit('key', { inputkey: 'rotate90' });
       break;
     case 'Enter':
       $('#input-chat').is(':focus') ? $('#input-chat').blur() : $('#input-chat').focus();

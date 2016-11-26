@@ -6,7 +6,7 @@ let canvases = [], canvasctx = [], mycanvas, myctx, selectedRoom;
 // let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
 //T, J, L, S, O, I, Z
 const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000', 'beige'];
-const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan', 'beige']; // in honor of the brave Samuel Söderberg. support the fight against autism
+const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan', 'beige'];
 const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646', 'beige'];
 const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', 'beige'];
 
@@ -14,15 +14,16 @@ const colorthemes = { bright, autism, monochrome, monochromeold };
 let colors = colorthemes.bright;
 
 const blockset = {};
-blockset.default = [];
 
-['default', 'autism', 'monochrome'].forEach(setname => {
+['default', 'monochrome'].forEach(setname => {
+  blockset[setname] = [];
   for (let i = 0; i < 9; i++) {
     blockset[setname][i] = new Image();
     blockset[setname][i].src = '/skins/' + setname + '/' + i + '.png';
   }
 });
 
+let theme = blockset.default;
 
 $('body').on("click", "#rooms tr.room", function(){
   selectedRoom = $(this).children().first().html();
@@ -32,15 +33,15 @@ $('body').on("click", "#rooms tr.room", function(){
 });
 $('#options-button').on("click", function(){
   $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();
-  $('input:radio[name=color]').each(() => {
-    if (colors == colorthemes[$(this).value])
-      $(this).checked = true;
-      console.log($(this).value);
+  $('input:radio[name=color]').each((index, value) => {
+    if (theme == blockset[value.value]) {
+      value.checked = true;
+    }
   });
 });
 
 $('#options-content > input').click(() => {
-  colors = colorthemes[$('input[name=color]:checked').val()];
+  theme = blockset[$('input[name=color]:checked').val()];
 });
 
 const socket = io();
@@ -282,16 +283,9 @@ function DrawMatrix(matrix, canvas, context, piecequeue, piece, live = true) {
   context.clearRect(0, 0, canvas.width, canvas.height);
   matrix.forEach((col, x) => {
     col.forEach((value, y) => {
-      context.fillStyle = colors[value];
-      if (value != 8)
-        context.fillRect(x * canvassize, y * canvassize, canvassize, canvassize);
-      else {
-        context.beginPath();
-        context.rect(x * canvassize, y * canvassize, canvassize, canvassize);
-        context.rect((x + 0.1) * canvassize, (y + 0.1) * canvassize, 0.8 * canvassize, 0.8 * canvassize);
-        context.fill("evenodd");
-        context.closePath();
-      }
+      // context.fillStyle = colors[value];
+      // context.fillRect(x * canvassize, y * canvassize, canvassize, canvassize);
+      context.drawImage(theme[value], x * canvassize, y * canvassize);
     });
   });
   context.fillStyle = "#333";
@@ -300,8 +294,9 @@ function DrawMatrix(matrix, canvas, context, piecequeue, piece, live = true) {
     for (let i = 0; i < piecequeue[index].matrix.length; i++) {
       for (let o = 0; o < piecequeue[index].matrix[i].length; o++) {
         if (piecequeue[index].matrix[i][o] !== 0) {
-          context.fillStyle = colors[piecequeue[index].matrix[i][o]];
-          context.fillRect((i + arenaWidth + 1) * canvassize, (o + index * 4 + 1) * canvassize, canvassize, canvassize);
+          // context.fillStyle = colors[piecequeue[index].matrix[i][o]];
+          // context.fillRect((i + arenaWidth + 1) * canvassize, (o + index * 4 + 1) * canvassize, canvassize, canvassize);
+          context.drawImage(theme[piecequeue[index].matrix[i][o]], (i + arenaWidth + 1) * canvassize, (o + index * 4 + 1) * canvassize);
         }
       }
     }

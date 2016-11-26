@@ -6,5 +6,5 @@ Dynamic rotation (move piece to left/right if in tight space), rotate around mid
 
 Add more modes (Timed, First to X lines, Survival)
 
-TODO: Add timer (for timed mode)
-TODO: Add support for skins
+DONE: Add timer (for timed mode)
+TO-DONE: Add support for skins
