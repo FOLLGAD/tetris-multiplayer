@@ -96,3 +96,33 @@ function keyUpHandler(e) {
   }
   e.preventDefault();
 }
+
+$('body').on("click", "#rooms tr.room", function(){
+  selectedRoom = $(this).children().first().html();
+  $(this).css({backgroundColor: "green"});
+  console.log("selectedRoom: "+selectedRoom);
+  UpdateJoinButton();
+});
+$('#options-button').on("click", function(){
+  $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();
+  $('input:radio[name=color]').each((index, value) => {
+    if (theme == blockset[value.value]) {
+      value.checked = true;
+    }
+  });
+});
+
+function ClearGameState () {
+  $('#maincanvas').empty();
+  $('#time > p').empty();
+  let deprecatedcanvases = document.getElementById("canvases");
+  while(deprecatedcanvases.hasChildNodes()) {
+    deprecatedcanvases.removeChild(deprecatedcanvases.firstChild);
+  }
+  let oldscores = document.getElementById('scoreboard');
+  while(oldscores.hasChildNodes()) {
+    oldscores.removeChild(oldscores.firstChild);
+  }
+  canvases = [];
+  canvasctx = [];
+}

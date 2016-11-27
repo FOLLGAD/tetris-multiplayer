@@ -44,7 +44,6 @@
     <div id="options-container" style="display:none">
       <div id="options-content">
         <h1>Blockstyles</h1>
-        <!-- buttons for colors -->
         <input type="radio" name="color" value="default"> Bright <br/>
         <input type="radio" name="color" value="autism"> Autism <br/>
         <input type="radio" name="color" value="monochrome"> Monochrome
@@ -57,7 +56,7 @@
     </div>
     <div id="chatdiv">
       <ul id="chatlist">
-        <li>Welcome to Tetris, gay boy</li>
+        <li>Welcome to tetral.me!</li>
       </ul>
       <input id="input-chat" autocomplete="off" type="text">
     </div>
@@ -70,17 +69,20 @@
   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
   crossorigin="anonymous"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script type="text/javascript" src="newclient.js"></script>
-  <script type="text/javascript" src="keyhandler.js"></script>
+  <script type="text/javascript" src="client.js"></script>
   <script>
-      $(document).ready(function() {
-     $('#input-chat').blur();
-     $('#register-input').focus();
+    // Checks if touch-device, and imports the files phone or computer accordingly
+    if ('ontouchstart' in window || navigator.maxTouchPoints)
+      $.getScript("phone.js");
+    else
+      $.getScript("computer.js");
+
+    $(document).ready(function() {
+      $('#register-input').focus();
     });
-    document.onload
   </script>
   <!--
-        === EMIL AHLBÄCK PROD. ===
-              - 1999-2099 -
+            === EMIL AHLBÄCK PRODUCTIONS ===
+                        1999-2020
   -->
 </html>

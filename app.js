@@ -325,7 +325,7 @@ class RoomClass {
     this.startingTime = 0;
   }
   SendPackets() {
-    let time = this.endingTime, deliver = [];
+    let timeleft = this.endingTime - Date.now(), deliver = [];
     for (let id in this.tetris) {
       const i = deliver.push({}) - 1;
       deliver[i].matrix = this.tetris[id].DrawMatrix();
@@ -339,7 +339,7 @@ class RoomClass {
       }
     }
     if (this.type == 'timed')
-      io.to(this.name).emit('packet', { deliver, time });
+      io.to(this.name).emit('packet', { deliver, timeleft });
     else
       io.to(this.name).emit('packet', { deliver });
   }
