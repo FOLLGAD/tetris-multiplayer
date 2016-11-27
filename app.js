@@ -364,6 +364,7 @@ class Tetris {
     }
   }
 }
+
 class Player {
   constructor(seed, username) {
     this.n = 0;
@@ -381,17 +382,7 @@ class Player {
   }
   NewPiece () {
     while (this.pieceQueue.length < 6) {
-      this.bag = [];
-      while (this.bag.length < 7) {
-        this.pieceNumber = this.getPieceNumber();
-        if (!isInArray(this.pieceNumber, this.bag)){
-          this.bag.push(this.pieceNumber);
-        }
-      }
-      console.log(this.bag);
-      for(let i = 0; i < this.bag.length; i++){
-        this.pieceQueue.push(new Piece(this.tetris.width / 2, this.bag[i]/*this.getPieceNumber()*/));
-      }
+      this.pieceQueue.push(new Piece(this.tetris.width / 2, this.getPieceNumber()));
     }
     this.piece = this.pieceQueue.splice(0, 1)[0];
   }
@@ -602,7 +593,4 @@ function OutputServerInfo() {
   Rooms.forEach(elem => {
     console.log(elem.name + ": " + elem.players.length + " players");
   });
-}
-function isInArray(value, array) {
-  return array.indexOf(value) > -1;
 }
