@@ -204,7 +204,7 @@ function ConnectToRoomID (id, roomnumber, socket) {
           const i = deliver.push({}) - 1;
           deliver[i].score = Rooms[room].tetris[id].score;
           deliver[i].username = Rooms[room].tetris[id].username;
-          deliver[i].identity = Players[id].identity;
+          deliver[i].identity = Rooms[room].tetris[id].identity;
         }
         socket.emit('initgame', { width: 10, height: 20, players: deliver });
       }
