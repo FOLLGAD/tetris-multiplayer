@@ -544,10 +544,15 @@ class Player {
         }
       }
     }
-    if (rowscleared === 1) this.score += 40;
-    else if (rowscleared === 2) this.score += 100;
-    else if (rowscleared === 3) this.score += 300;
-    else if (rowscleared === 4) this.score += 1200;
+
+    if (rowscleared === 1 || rowscleared === 2 || rowscleared === 3 || rowscleared === 4){
+      this.combo++;
+    } else this.combo = 0;
+
+    if (rowscleared === 1) this.score += 40 * this.combo;
+    else if (rowscleared === 2) this.score += 100 * this.combo;
+    else if (rowscleared === 3) this.score += 300 * this.combo;
+    else if (rowscleared === 4) this.score += 1200 * this.combo;
   }
   ClearRow(row) {
     let i = this.tetris.width;
