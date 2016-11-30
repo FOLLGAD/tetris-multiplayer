@@ -87,7 +87,7 @@ let canvassize = 16, scale = 1;
 socket.on('initgame', function (packet) {
   ClearGameState();
   $('#roomselector-container').hide();
-  $('#gameover-container').hide();
+  $('#gameover-content').hide();
   $('#startgame-container').hide();
   packet.players.forEach(player => {
     let mycanvassize, myscale, canvasid;
@@ -131,13 +131,13 @@ socket.on('initgame', function (packet) {
 });
 socket.on('gameover', results => {
   let gameovermsg, i = 1;
-  $('#gameover-container').show();
+  $('#gameover-content').show();
   $('#startgame-container').show();
   if (typeof results[0] != 'undefined' && typeof results[1] != 'undefined' && results[0].score == results[1].score)
     gameovermsg = "There was a tie!";
   else
-    gameovermsg = results[0].username + " won the game!";
-  $('#gameover-content p').html('<p>'+ gameovermsg +'</p><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
+    gameovermsg = '<span style="color:green">'+results[0].username + "</span> won the game!";
+  $('#gameover-content p').html('<h4>'+ gameovermsg +'</h4><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
   results.forEach(element => {
     $('#gameover-content table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
   });
