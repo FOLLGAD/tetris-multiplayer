@@ -101,10 +101,17 @@ body {
   padding: 10px;
 }
 #startgame-container {
+  position: absolute;
+  width: 800px;
+  top: 25%;
+  left: 50%;
+}
+#startgame-content {
   position: relative;
   left: -50%;
   background-color: white;
   text-align: center;
+  height: 500px;
   padding: 10px;
 }
 .center{
@@ -170,13 +177,6 @@ body {
   left: -50%;
   background: white;
   border: 2px black;
-}
-#startgame-container {
-  position: relative;
-  left: -50%;
-  border: 2px black;
-  text-align: center;
-  height: 500px;
 }
 #startgame-container h1 {
   margin: 0px;

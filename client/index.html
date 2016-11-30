@@ -7,12 +7,6 @@
   </head>
   <body>
     <button id="options-button" class="button">Options</button>
-    <div id="gameover-container" style="display: none">
-      <div id="gameover-content">
-        <p></p>
-        <button class="button" id="restartgame" onclick="RequestGameStart()">Play Again</button>
-      </div>
-    </div>
     <div id="time"><p></p></div>
     <div id="scoreboard"></div>
     <div id="clientcontainer" style="display:none">
@@ -33,12 +27,19 @@
       <div id="roomselector-content">
         <table id="rooms"></table>
       </div>
-      <div id="startgame-container" style="display:none">
-            <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
-            <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
-          <div id="gamesettings">
-            <h3>Game Settings</h3>
+    </div>
+    <div id="startgame-container" style="display:none">
+      <div id="startgame-content">
+        <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+        <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
+        <div id="gameover-container" style="display: none">
+          <div id="gameover-content">
+            <p></p>
           </div>
+        </div>
+        <div id="gamesettings">
+          <h3>Game Settings</h3>
+        </div>
       </div>
     </div>
     <div id="options-container" style="display:none">
