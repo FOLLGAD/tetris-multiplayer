@@ -25,8 +25,6 @@ const blockset = {};
 
 let theme = blockset.default;
 
-
-
 $('#options-content > input').click(() => {
   theme = blockset[$('input[name=color]:checked').val()];
 });
@@ -44,41 +42,37 @@ function UpdateJoinButton(){
   }
 }
 socket.on('roominfo', function (roominfo) {
-  $('#roomselector-container').show();
-  $('#roomselector-content').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
-  $('#roomselector-content table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
+  SwitchView(["roombrowser"]);
+  $('#roombrowser-page').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
+  $('#roombrowser-page table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
   UpdateJoinButton();
   if(roominfo.length < 1){
-      $('#roomselector-content table').html('<h1 class="center">There are no rooms!</h1>');
+      $('#roombrowser-page table').html('<h1 class="center">There are no rooms!</h1>');
   }else{
       roominfo.forEach(element => {
-      $('#roomselector-content table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
+      $('#roombrowser-page table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
       $('#join-room').click(() => {
-        JoinGame(selectedRoom);
+        JoinRoom(selectedRoom);
       });
     });
   }
 
   $('#create-room').click(() => {
-    JoinGame(-1);
+    JoinRoom(-1);
   });
   $('#refresh-room').click(() => {
     RequestRoomInfo();
   });
 });
 
-function JoinGame (roomname) {
-  $('#clientcontainer').show();
-  $('#startgame-container').show();
-
+function JoinRoom (roomname) {
+  SwitchView(['room']);
   socket.emit('joinroom', roomname);
 }
 
 function LeaveRoom () {
   socket.emit('requestrooms');
-  $('#startgame-container').hide();
-  $('#clientcontainer').hide();
-  $('#roomselector-content').show();
+  SwitchView(['roombrowser']);
 }
 
 let canvassize = 16, scale = 1;
@@ -86,9 +80,7 @@ let canvassize = 16, scale = 1;
 // Create a number of canvases
 socket.on('initgame', function (packet) {
   ClearGameState();
-  $('#roomselector-container').hide();
-  $('#gameover-content').hide();
-  $('#startgame-container').hide();
+  SwitchView(['ingame']);
   packet.players.forEach(player => {
     let mycanvassize, myscale, canvasid;
     // sets scale to times two if it is your canvas
@@ -117,7 +109,6 @@ socket.on('initgame', function (packet) {
       myctx.imageSmoothingEnabled = false;
     }
   });
-  $('#gamecontrols').hide();
   canvases.push(...$('#canvases > div > canvas'));
   canvases.forEach(elem => canvasctx.push(elem.getContext('2d')));
   canvases.forEach(elem => {
@@ -131,8 +122,7 @@ socket.on('initgame', function (packet) {
 });
 socket.on('gameover', results => {
   let gameovermsg, i = 1;
-  $('#gameover-content').show();
-  $('#startgame-container').show();
+  SwitchView(['room'])
   if (typeof results[0] != 'undefined' && typeof results[1] != 'undefined' && results[0].score == results[1].score)
     gameovermsg = "There was a tie!";
   else
@@ -142,7 +132,6 @@ socket.on('gameover', results => {
     $('#gameover-content table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
   });
   $('#gameover-content p').append('</table>');
-  $('#gamecontrols').show();
 });
 
 let myid;
@@ -151,10 +140,10 @@ socket.on('registerrequest', id => {
   ClearGameState();
   myid = id.clientid;
   myidentity = id.identity;
-  $('#menu-container').show();
+  SwitchView(['start']);
 });
 
-$("form").submit(e => {
+$("form#register").submit(e => {
   e.preventDefault();
   let name;
   if ($('#register-input').val() !== '')
@@ -162,18 +151,15 @@ $("form").submit(e => {
   else
     name = 'Unknown Tetro';
   socket.emit('register', name);
-  $('#menu-container').hide();
   socket.emit('requestrooms');
+  SwitchView(['roombrowser']);
 });
 
 socket.on('playerlist', playersarray => {
-  $('#roomselector-content').hide();
   $('#clientlist').empty();
   for (let i = 0; i < playersarray.length; i++) {
     $('#clientlist').append('<li>'+ playersarray[i].username +'</li>');
   }
-  $('#inroom-controls').show();
-  $('#startgame-container').show();
 });
 
 socket.on('packet', packet => {
@@ -298,11 +284,16 @@ socket.on('chat-msg', function (packet) {
 
 let viewports = {};
 viewports.serverlist = [
-  
+
 ]
 
-function SwitchView() {
-
+function SwitchView(visible) {
+  $(".page").addClass("hidden");
+  if (visible.constructor !== Array) return;
+  visible.forEach(elem => {
+    $("#" + elem + "-page").removeClass("hidden");
+    if ($('#' + elem + '-page').length < 1) console.warn(elem + 'does not exist');
+  });
 }
 
 const Disp=(o="")=>{[3,8,5,7,10,0,4,7,1,9,2,6].forEach(a=>o+='abcehiklmä '[a]);return o+" "+(63<<5);};

@@ -3,82 +3,62 @@
   <head>
     <title>Tetris</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
   </head>
   <body>
-    <button id="options-button" class="button">Options</button>
-    <div id="time"><p></p></div>
-    <div id="scoreboard"></div>
-    <div id="clientcontainer" style="display:none">
-      Players
-      <ul id="clientlist">
-      </ul>
-    </div>
-    <div id="ingame">
-      <div id="maincanvas"></div>
-      <div id="canvases"></div>
-    </div>
-    <div id="menu">
-      <h1>Tetris</h1>
-      <form id="register">
-        <input id="register-input" name="register-input" placeholder="Your name" autocomplete="off" type="text">
-        <input class="button stretch" type="submit" name="Enter" value="Enter">
-      </form>
-    </div>
-    <div id="roomselector-container" style="display: none">
-      <div id="roomselector-content">
+    <div id="container">
+      <div id="start-page" class="page">
+        <form id="register">
+          <input name="register-input" placeholder="Enter a name" autocomplete="off" type="text">
+          <input class="button stretch" type="submit" name="Enter" value="Enter">
+        </form>
+      </div>
+      <div id="room-page" class="page hidden"> <!-- This is shown whenever in a lobby or in-game -->
+        <div id="chat">
+          <ul>
+            <li>Welcome to tetral.me!</li>
+          </ul>
+          <input autocomplete="off" type="text">
+        </div>
+        <!-- <div id="maincanvas"></div> -->
+        <!-- <div id="canvases"></div> -->
+        <div id="gamelobby-content">
+          <div id="scoreboard"></div>
+          <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+          <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
+          <div id="gamesettings">
+            <h4>Game Settings</h4>
+            <input name="Lobby Name" placeholder="Lobby Name" type="text">
+            <input name="Private" type="checkbox">
+            <!-- Buttons and inputs with settings -->
+            <!-- Disabled for everybody who is not the owner -->
+          </div>
+        </div>
+      </div>
+      <div id="ingame-page" class="page hidden">
+        <!-- This is shown whenever in a lobby or in-game -->
+        <div id="maincanvas"></div>
+        <div id="canvases"></div>
+        <div id="playerlist"></div>
+      </div>
+      <div id="roombrowser-page" class="page hidden">
         <table id="rooms"></table>
       </div>
     </div>
-    <div id="startgame-container" style="display:none">
-      <div id="startgame-content">
-        <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
-        <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
-          <div id="gameover-content">
-            <p></p>
-          </div>
-        <div id="gamesettings">
-          <h4>Game Settings</h4>
-        </div>
-      </div>
-    </div>
-    <div id="options-container" style="display:none">
-      <div id="options-content">
-        <h1>Blockstyles</h1>
-        <input type="radio" name="color" value="default"> Bright <br/>
-        <input type="radio" name="color" value="autism"> Autism <br/>
-        <input type="radio" name="color" value="monochrome"> Monochrome
-      </div>
-    </div>
-    <div id="gamecontrols">
-      <!-- <button class="gamemode">Marathon</button>
-      <button class="gamemode">Arena</button>
-      <button id="leaveroom">Leave Room</button> -->
-    </div>
-    <div id="chatdiv">
-      <ul id="chatlist">
-        <li>Welcome to tetral.me!</li>
-      </ul>
-      <input id="input-chat" autocomplete="off" type="text">
-    </div>
   </body>
-
-  <!-- JS -->
-  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
   <script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"
+  ></script>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="client.js"></script>
   <script>
-    // Checks if touch-device, and imports the files phone or computer accordingly
+    // Checks whether client is using a touch-device, and imports either the file 'phone' or 'computer' accordingly
     if ('ontouchstart' in window || navigator.maxTouchPoints)
       $.getScript("phone.js");
     else
       $.getScript("computer.js");
-
-    $(document).ready(function() {
+    $(() => {
       $('#register-input').focus();
     });
   </script>

@@ -1,238 +1,27 @@
-html {
-  background: #222;
+body, html {
+  background: #212121;
   overflow: hidden;
 }
-canvas {
-  border: solid 5px;
-}
-@import url('https://fonts.googleapis.com/css?family=Roboto:900');
-body {
-  font-family: 'Roboto', sans-serif;
-  font-size: 28px;
-}
-#main {
-  outline: none;
-}
-#header {
-  text-align: center;
-  font-size: 48px;
-  /*font-family: "Courier New", Courier, monospace;*/
-  font-family: 'Roboto', sans-serif;
-  color: grey;
-}
-#scoreboard {
-  position: relative;
-}
-#clientcontainer {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 20px;
-  width: 200px;
-  border: solid 1px black;
-  padding: 20px;
-  word-break: break-all;
-  color: white;
-}
-#clientcontainer > p {
-  opacity: 1;
-}
-#clientlist {
-  opacity: 1;
-  list-style: none;
-  padding-left: 0;
-}
-#menu-container {
-  text-align: center;
-  margin-top: 100px;
-}
-#menu-container h1 {
-  color: grey;
+.halign {
+  display: block;
+  margin: 0 auto 0 auto;
 }
 .button {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 28px;
-    margin-top: 5px;
+  background: #ff9800;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 28px;
+  margin-top: 5px;
 }
 .button:disabled {
-  background-color: grey;
+  background-color: #9e9e9e;
 }
-.button.space{
+.button.space {
   margin-right: 5px;
 }
-#leaveroom {
-  background-color: #322F2D;
-  font-size: 16px;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-#gameover-container {
-  position: absolute;
-  /*margin-left: auto;
-  margin-right: auto;*/
-  width: 500px;
-  top: 25%;
-  left: 50%;
-}
-#options-container {
-  position: absolute;
-  width: 500px;
-  top: 25%;
-  left: 50%;
-}
-#options-content {
-  position: relative;
-  left: -50%;
-  background-color: white;
-  text-align: center;
-  padding: 10px;
-}
-#startgame-container {
-  position: absolute;
-  width: 800px;
-  top: 25%;
-  left: 50%;
-}
-#startgame-content {
-  position: relative;
-  left: -50%;
-  background-color: white;
-  text-align: center;
-  height: 500px;
-}
-.center{
-  text-align: center;
-}
-#chatdiv {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  margin: 20px;
-  background: grey;
-  padding: 10px;
-  width: 350px;
-  height: 300px;
-  font-size: 16px;
-}
-.stretch{
-  width: 100%;
-}
-#chatlist {
-  position: relative;
-  overflow-y: auto;
-  list-style: none;
-  padding: 10px;
-  height: 80%;
-  margin: 0;
-}
-#input-chat {
-  position: absolute;
-  width: 100%;
-  border: none;
-  padding: 10px;
-  bottom: 0;
-  left: 0;
-  box-sizing: border-box;
-}
-#register {
-  width: 250px;
-  margin: 0 auto 0 auto;
-  box-sizing: border-box;
-}
-#register input[type="text"] {
-  width: 100%;
-  padding: 15px;
-  font-size: 28px;
-  box-sizing: border-box;
-  -webkit-box-sizing:border-box;
-  -moz-box-sizing: border-box;
-}
-#sendchat {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-}
-#roomselector-container {
-  width: 1000px;
-  position: absolute;
-  left: 50%;
-  top: 200px;
-}
-#roomselector-content {
-  position: relative;
-  left: -50%;
-  background: white;
-  border: 2px black;
-}
-#startgame-container h1 {
-  margin: 0px;
-}
-#startgame {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-#roomselector button {
-  box-sizing: border-box;
-  width: 100%;
-}
-.playerName {
-  list-style: none;
-}
-.playerScore {
-  list-style: none;
-}
-#canvases > div {
-  display: inline-block;
-  float:left;
-}
-table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-}
-td, th {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-}
-
-tr:nth-child(even) {
-    background-color: #dddddd;
-}
-#canvases, #maincanvas {
-  display: inline-block;
-}
-#time {
-  position: fixed;
-  bottom: 20px;
-  text-align: center;
-  width: 400px;
-  left: 50%;
-  margin-left: -200px;
-}
-#time > p {
-  text-align: center;
-  font-size: 64px;
-}
-#gamesettings{
-  /*margin-left: 20px;*/
-  float: right;
-  height: 500px;
-  background-color: #D3D3D3;
-}
-#gameover-content {
-  background-color: white;
-  text-align: center;
-  padding: 10px;
-  float: left;
+.hidden {
+  display: none;
 }

@@ -3,14 +3,14 @@
 
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
-document.getElementById('input-chat').addEventListener('keydown', e => {
+$('#chat > input')[0].addEventListener('keydown', e => {
   if (e.code == "Enter") { SendChatMsg(); $('#input-chat').blur(); }
   e.stopPropagation();
 }, false);
-document.getElementById('input-chat').addEventListener('keyup', e => {
+$('#chat > input')[0].addEventListener('keyup', e => {
   e.stopPropagation();
 }, false);
-document.getElementById('register-input').addEventListener('keydown', e => {
+$('#register')[0].addEventListener('keydown', e => {
   e.stopPropagation();
 }, false);
 
@@ -103,6 +103,7 @@ $('body').on("click", "#rooms tr.room", function(){
   console.log("selectedRoom: "+selectedRoom);
   UpdateJoinButton();
 });
+
 $('#options-button').on("click", function(){
   $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();
   $('input:radio[name=color]').each((index, value) => {
