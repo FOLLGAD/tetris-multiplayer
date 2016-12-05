@@ -4,13 +4,16 @@
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
 $('#chat > input')[0].addEventListener('keydown', e => {
-  if (e.code == "Enter") { SendChatMsg(); $('#input-chat').blur(); }
+  if (e.code == "Enter") {
+    SendChatMsg();
+    $('#chat > input').blur();
+  }
   e.stopPropagation();
 }, false);
 $('#chat > input')[0].addEventListener('keyup', e => {
   e.stopPropagation();
 }, false);
-$('#register')[0].addEventListener('keydown', e => {
+$('#nick')[0].addEventListener('keydown', e => {
   e.stopPropagation();
 }, false);
 
@@ -66,7 +69,7 @@ function keyDownHandler(e) {
       socket.emit('key', { inputkey: 'rotate90' });
       break;
     case 'Enter':
-      $('#input-chat').is(':focus') ? $('#input-chat').blur() : $('#input-chat').focus();
+      $('#chat > input').is(':focus') ? $('#chat > input').blur() : $('#chat > input').focus();
       break;
   }
 }
@@ -96,13 +99,6 @@ function keyUpHandler(e) {
   }
   e.preventDefault();
 }
-
-$('body').on("click", "#rooms tr.room", function(){
-  selectedRoom = $(this).children().first().html();
-  $(this).css({backgroundColor: "green"});
-  console.log("selectedRoom: "+selectedRoom);
-  UpdateJoinButton();
-});
 
 $('#options-button').on("click", function(){
   $("#options-container").is(":visible") ? $("#options-container").hide() : $("#options-container").show();

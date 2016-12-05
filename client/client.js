@@ -1,21 +1,16 @@
 // jshint esversion: 6
 // jshint -W030
 
-let canvases = [], canvasctx = [], mycanvas, myctx, selectedRoom;
-
-// let colors = ['#31c7ef', '#f7d308', '#ad4d9c', '#00ff00', '#ff0000', '#00f', '#ef7921'];
-//T, J, L, S, O, I, Z
-const bright = ['#000', '#ad4d9c', '#0000ff', '#ef7921', '#00ff00', '#f7d308', '#31c7ef', '#ff0000', 'beige'];
-const autism = ['#FF69B4', 'red', 'green', 'blue', 'orange', 'brown', 'purple', 'cyan', 'beige'];
-const monochrome = ['#000', '#D1D1D1', '#BABABA', '#A3A3A3', '#7C7C7C', '#5D5D5D', '#FFFFFF', '#464646', 'beige'];
-const monochromeold = ['#000', '#FFF', '#DDD', '#BBB', '#999', '#777', '#555', '#CCC', 'beige'];
-
-const colorthemes = { bright, autism, monochrome, monochromeold };
-let colors = colorthemes.bright;
+let canvases = [],
+    canvasctx = [],
+    lastpacket,
+    mycanvas,
+    myctx,
+    animationid;
 
 const blockset = {};
 
-['default', 'monochrome'].forEach(setname => {
+['default', 'monochrome', 'autism'].forEach(setname => {
   blockset[setname] = [];
   for (let i = 0; i < 9; i++) {
     blockset[setname][i] = new Image();
@@ -34,29 +29,36 @@ const socket = io();
 function RequestRoomInfo () {
   socket.emit('requestrooms');
 }
-function UpdateJoinButton(){
-  if (selectedRoom === null) {
-    $("#join-room").attr('disabled','disabled');
-  }else{
-    $("#join-room").removeAttr('disabled');
-  }
-}
 socket.on('roominfo', function (roominfo) {
   SwitchView(["roombrowser"]);
-  $('#roombrowser-page').html('<table id="rooms"></table><button id="create-room" class="button space">Create</button><button id="join-room" class="button space">Join</button><button id="refresh-room" class="button space">Refresh</button>');
-  $('#roombrowser-page table').html('<tr><th>Game Name</th><th>Description</th><th>Host</th><th>Mode</th><th>Players</th></tr>');
-  UpdateJoinButton();
+  $('#roombrowser-page table').html(`
+      <tr>
+        <th>Game Name</th>
+        <th>Host</th>
+        <th>Mode</th>
+        <th>Players</th>
+        <th></th>
+      </tr>
+    `);
   if(roominfo.length < 1){
       $('#roombrowser-page table').html('<h1 class="center">There are no rooms!</h1>');
-  }else{
+      $("#join-room").addClass('disabled');
+  } else {
       roominfo.forEach(element => {
-      $('#roombrowser-page table').append('<tr class="room"><td>' + element.name + "</td><td>Desc</td><td>Host</td><td>Mode</td><td>" + element.players + ' </td></tr>');
-      $('#join-room').click(() => {
-        JoinRoom(selectedRoom);
-      });
+      $('#roombrowser-page table').append(`
+          <tr class="room">
+            <td>${element.name}</td>
+            <td>Host</td>
+            <td>Mode</td>
+            <td>${element.players}</td>
+            <td><button class="button joinbtn" name=${element.name}>Join</button></td>
+          </tr>
+        `);
     });
   }
-
+  $('#roombrowser-page > table > tr > td > button.joinbtn').click(function() {
+    JoinRoom($(this).attr('name'));
+  });
   $('#create-room').click(() => {
     JoinRoom(-1);
   });
@@ -79,6 +81,7 @@ let canvassize = 16, scale = 1;
 
 // Create a number of canvases
 socket.on('initgame', function (packet) {
+  ingame = true;
   ClearGameState();
   SwitchView(['ingame']);
   packet.players.forEach(player => {
@@ -119,10 +122,13 @@ socket.on('initgame', function (packet) {
     elem.scale(scale, scale);
     elem.imageSmoothingEnabled = false;
   });
+  animationid = requestAnimationFrame(DrawAll);
 });
 socket.on('gameover', results => {
+  ingame = false;
+  cancelAnimationFrame(animationid);
   let gameovermsg, i = 1;
-  SwitchView(['room'])
+  SwitchView(['room']);
   if (typeof results[0] != 'undefined' && typeof results[1] != 'undefined' && results[0].score == results[1].score)
     gameovermsg = "There was a tie!";
   else
@@ -143,13 +149,14 @@ socket.on('registerrequest', id => {
   SwitchView(['start']);
 });
 
-$("form#register").submit(e => {
+$("form#nick").submit(e => {
   e.preventDefault();
   let name;
-  if ($('#register-input').val() !== '')
-    name = $('#register-input').val();
+  if ($('#nick > input[type="text"]').val() !== '')
+    name = $('#nick > input[type="text"]').val();
   else
     name = 'Unknown Tetro';
+  if (name.length > 20) return;
   socket.emit('register', name);
   socket.emit('requestrooms');
   SwitchView(['roombrowser']);
@@ -162,7 +169,20 @@ socket.on('playerlist', playersarray => {
   }
 });
 
+let shouldskip, packet, ingame = false;
+
 socket.on('packet', packet => {
+  lastpacket = packet;
+  shouldskip = false;
+});
+
+function DrawAll() {
+  if (shouldskip || !lastpacket) {
+    console.log("skipped");
+    animationid = requestAnimationFrame(DrawAll);
+    return;
+  }
+  let packet = Object.assign({}, lastpacket);
   let cnv = 0;
   if (typeof packet.timeleft != 'undefined') {
     let time = packet.timeleft / 1000,
@@ -175,15 +195,17 @@ socket.on('packet', packet => {
     if (player.identity === myidentity) {
       DrawMatrix(player.matrix, mycanvas, myctx, player.pieceQueue, player.activePiece, player.live);
       $('#maincanvas > div > ul > .playerName').text(player.username);
-      $('#maincanvas > div > ul > .playerScore').text(player.score);
+      $('#maincanvas > div > ul > .playerScore').text('Score: ' + player.score);
     } else {
       DrawMatrix(player.matrix, canvases[cnv], canvasctx[cnv], player.pieceQueue, player.activePiece, player.live);
       $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerName').text(player.username);
       $('#canvases > div:nth-child(' + (cnv + 1) + ') > ul > .playerScore').text(player.score);
       cnv++;
     }
+    shouldskip = true;
   });
-});
+  animationid = requestAnimationFrame(DrawAll);
+}
 
 function DrawPiece(piece, matrix) {
   if (piece !== null) {
@@ -271,21 +293,16 @@ function RequestGameStart() {
 }
 
 function SendChatMsg() {
-  if ($("#input-chat").val().replace(/\s/g, '').length !== 0) {
-    socket.emit("chat-msg", $("#input-chat").val());
+  if ($("#chat > input").val().replace(/\s/g, '').length !== 0) {
+    socket.emit("chat-msg", $("#chat > input").val());
   }
-  $("#input-chat").val("");
+  $("#chat > input").val("");
 }
 
 socket.on('chat-msg', function (packet) {
-  $('#chatlist').append("<li>" + packet.username + ": " + packet.message + "</li>");
-  $('#chatlist').scrollTop($('#chatlist').prop("scrollHeight"));
+  $('#chat > ul').append('<li><span class="sender">' + packet.username + '</span>: ' + packet.message + '</li>');
+  $('#chat > ul').scrollTop($('#chat > ul').prop("scrollHeight"));
 });
-
-let viewports = {};
-viewports.serverlist = [
-
-]
 
 function SwitchView(visible) {
   $(".page").addClass("hidden");

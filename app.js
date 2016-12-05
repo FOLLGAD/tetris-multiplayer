@@ -30,9 +30,6 @@ io.on('connection', function (socket) {
   socket.on('register', function (username) {
     if (!!clientroom) DisconnectFromRoom(clientid, clientroom);
     Players[clientid].username = username;
-    // clientroom = ConnectToRoom(clientid);
-    // socket.join(clientroom.name);
-    // io.to(clientroom.name).emit('playerlist', clientroom.players);
   });
 
   socket.on('joinroom', function (roomname) {
@@ -166,12 +163,8 @@ const AUTISMTETRO = [];
   ];
 
 let piecematrix = NORMALTETRO;
-// piecematrix = AUTISMTETRO;
 
 let Piece = function (x, n) {
-  // if (!n)
-  //   this.matrix = GetRandomPiece();
-  // else
   this.matrix = piecematrix[n];
   this.x = x - Math.floor(this.matrix[0].length / 2);
   this.y = 0;
@@ -211,7 +204,7 @@ function ConnectToRoomID (id, roomnumber, socket) {
       return Rooms[room];
     }
   }
-  console.log("could not find room");
+  console.log("could not find room", roomnumber);
 }
 
 function ConnectToNewRoom (id) {

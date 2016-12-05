@@ -3,35 +3,45 @@
   <head>
     <title>Tetris</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Bungee|Julius+Sans+One&amp;subset=latin-ext" rel="stylesheet">
   </head>
   <body>
     <div id="container">
       <div id="start-page" class="page">
-        <form id="register">
-          <input name="register-input" placeholder="Enter a name" autocomplete="off" type="text">
-          <input class="button stretch" type="submit" name="Enter" value="Enter">
+        <form id="nick" class="halign">
+          <input name="nick-input" placeholder="Enter a name" autocomplete="off" type="text" class="login">
+          <input class="button stretch" type="submit" value="Enter">
+        </form>
+        <form id="login" class="halign">
+          <div>
+            <input name="username" type="text" class="login" placeholder="Username">
+            <input name="password" type="password" class="login" placeholder="Password">
+          </div>
+          <input type="submit" class="button" value="Log In">
+          <input type="submit" class="button" value="Sign Up">
         </form>
       </div>
-      <div id="room-page" class="page hidden"> <!-- This is shown whenever in a lobby or in-game -->
+      <div id="roombrowser-page" class="page hidden halign">
+        <table id="rooms"></table>
+        <button id="create-room" class="button space">Create</button>
+        <button id="refresh-room" class="button space">Refresh</button>
+      </div>
+      <div id="room-page" class="page hidden"> <!-- This is shown before and after a game -->
+        <div id="scoreboard"></div>
+        <div id="gamesettings">
+          <h4>Game Settings</h4>
+          <input name="Lobby Name" placeholder="Lobby Name" type="text">
+          <input name="Private" type="checkbox">
+          <!-- Buttons and inputs with settings -->
+          <!-- Disabled for everybody who is not the owner -->
+        </div>
+        <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+        <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
         <div id="chat">
           <ul>
-            <li>Welcome to tetral.me!</li>
+            <li style="color:lightgrey">Welcome to tetral.me!</li>
           </ul>
           <input autocomplete="off" type="text">
-        </div>
-        <!-- <div id="maincanvas"></div> -->
-        <!-- <div id="canvases"></div> -->
-        <div id="gamelobby-content">
-          <div id="scoreboard"></div>
-          <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
-          <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
-          <div id="gamesettings">
-            <h4>Game Settings</h4>
-            <input name="Lobby Name" placeholder="Lobby Name" type="text">
-            <input name="Private" type="checkbox">
-            <!-- Buttons and inputs with settings -->
-            <!-- Disabled for everybody who is not the owner -->
-          </div>
         </div>
       </div>
       <div id="ingame-page" class="page hidden">
@@ -39,9 +49,6 @@
         <div id="maincanvas"></div>
         <div id="canvases"></div>
         <div id="playerlist"></div>
-      </div>
-      <div id="roombrowser-page" class="page hidden">
-        <table id="rooms"></table>
       </div>
     </div>
   </body>
@@ -59,7 +66,7 @@
     else
       $.getScript("computer.js");
     $(() => {
-      $('#register-input').focus();
+      $('#nick > input')[0].focus();
     });
   </script>
   <!--
