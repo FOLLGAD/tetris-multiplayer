@@ -31,12 +31,15 @@
         <div id="gamesettings">
           <h4>Game Settings</h4>
           <input name="Lobby Name" placeholder="Lobby Name" type="text">
-          <input name="Private" type="checkbox">
+          <br>
+          <input name="Private" type="checkbox">Private?
           <!-- Buttons and inputs with settings -->
           <!-- Disabled for everybody who is not the owner -->
+          <div>
+            <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
+            <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
+          </div>
         </div>
-        <button class="button" id="startgame" onclick="RequestGameStart()">Start Game</button>
-        <button class="button" id="leaveroom" onclick="LeaveRoom()">Leave Room</button>
         <div id="chat">
           <ul>
             <li><span class="server-msg">Welcome to tetral.me!</span></li>

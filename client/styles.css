@@ -150,3 +150,26 @@ table .button {
 .other-player > ul > * {
   padding: 10px;
 }
+#gamesettings {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: calc(100% - 20px);
+  box-sizing: border-box;
+  margin: 10px;
+  background: #2e2e2e;
+  padding: 10px;
+  width: 280px;
+  display: block;
+}
+#gamesettings > div {
+  bottom: 0;
+  margin: 0px;
+  width: 260px;
+  position: absolute;
+}
+#gamesettings > div > button {
+  margin: 10px 0px;
+  display: block;
+  width: 260px;
+}
