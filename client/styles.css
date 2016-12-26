@@ -173,3 +173,9 @@ table .button {
   display: block;
   width: 260px;
 }
+#scoreboard {
+  width: 700px;
+}
+#playerlist{
+  width: 60%;
+}

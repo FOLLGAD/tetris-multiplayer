@@ -7,6 +7,7 @@
   </head>
   <body>
     <div id="container">
+      <div id="scoreboard" class="halign"></div>
       <div id="start-page" class="page">
         <form id="nick" class="halign">
           <input name="nick-input" placeholder="Enter a name" autocomplete="off" type="text" class="login">
@@ -27,7 +28,16 @@
         <button id="refresh-room" class="button space">Refresh</button>
       </div>
       <div id="room-page" class="page hidden"> <!-- This is shown before and after a game -->
-        <div id="scoreboard"></div>
+        <div id="playerlist">
+          <h1>Players</h1>
+          <table>
+            <tr>
+              <th>Name</th>
+              <th>Wins</th>
+              <th>Team</th>
+            </tr>
+          </table>
+        </div>
         <div id="gamesettings">
           <h4>Game Settings</h4>
           <input name="Lobby Name" placeholder="Lobby Name" type="text">

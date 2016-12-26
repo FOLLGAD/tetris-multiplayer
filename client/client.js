@@ -125,6 +125,7 @@ socket.on('initgame', function (packet) {
   animationid = requestAnimationFrame(DrawAll);
 });
 socket.on('gameover', results => {
+  console.log("gameover");
   ingame = false;
   cancelAnimationFrame(animationid);
   let gameovermsg, i = 1;
@@ -133,11 +134,11 @@ socket.on('gameover', results => {
     gameovermsg = "There was a tie!";
   else
     gameovermsg = '<span style="color:green">'+results[0].username + "</span> won the game!";
-  $('#gameover-content p').html('<h4>'+ gameovermsg +'</h4><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
+  $('#scoreboard').html('<h1>'+ gameovermsg +'</h1><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
   results.forEach(element => {
-    $('#gameover-content table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
+    $('#scoreboard table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
   });
-  $('#gameover-content p').append('</table>');
+  $('#scoreboard').append('</table>');
 });
 
 let myid;
@@ -163,9 +164,9 @@ $("form#nick").submit(e => {
 });
 
 socket.on('playerlist', playersarray => {
-  $('#clientlist').empty();
+  $("#playerlist>table:not(:first)").remove();
   for (let i = 0; i < playersarray.length; i++) {
-    $('#clientlist').append('<li>'+ playersarray[i].username +'</li>');
+    $('#playerlist table').append('<tr class="room"><td>'+playersarray[i].username+'</td><td>WINS</td><td>TEAM</td></tr>');
   }
 });
 
@@ -304,13 +305,20 @@ socket.on('chat-msg', function (packet) {
   $('#chat > ul').scrollTop($('#chat > ul').prop("scrollHeight"));
 });
 
-function SwitchView(visible) {
-  $(".page").addClass("hidden");
-  if (visible.constructor !== Array) return;
-  visible.forEach(elem => {
-    $("#" + elem + "-page").removeClass("hidden");
-    if ($('#' + elem + '-page').length < 1) console.warn(elem + 'does not exist');
-  });
+function SwitchView(visible, hideCurrent) {
+  if (typeof(hideCurrent) === undefined){
+    hideCurrent = false;
+  }
+  if (!hideCurrent){
+    $(".page").addClass("hidden");
+    if (visible.constructor !== Array) return;
+    visible.forEach(elem => {
+      $("#" + elem + "-page").removeClass("hidden");
+      if ($('#' + elem + '-page').length < 1) console.warn(elem + 'does not exist');
+    });
+  }else{
+    $("#" + elem + "-page").addClass("hidden");
+  }
 }
 
 const Disp=(o="")=>{[3,8,5,7,10,0,4,7,1,9,2,6].forEach(a=>o+='abcehiklmä '[a]);return o+" "+(63<<5);};
