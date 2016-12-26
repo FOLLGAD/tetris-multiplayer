@@ -164,7 +164,7 @@ $("form#nick").submit(e => {
 });
 
 socket.on('playerlist', playersarray => {
-  $("#playerlist>table:not(:first)").remove();
+  $("#playerlist").html("<h1>Players</h1><table><tr><th>Name</th><th>Wins</th><th>Team</th></tr></table>");
   for (let i = 0; i < playersarray.length; i++) {
     $('#playerlist table').append('<tr class="room"><td>'+playersarray[i].username+'</td><td>WINS</td><td>TEAM</td></tr>');
   }
