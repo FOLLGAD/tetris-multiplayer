@@ -145,7 +145,7 @@ let myid;
 
 socket.on('registerrequest', id => {
   ClearGameState();
-  myid = id.clientid;
+  myid = id.clientId;
   myidentity = id.identity;
   SwitchView(['start']);
 });
