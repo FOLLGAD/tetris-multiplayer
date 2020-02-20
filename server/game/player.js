@@ -26,7 +26,6 @@ module.exports = class Player {
 					this.bag.push(this.pieceNumber);
 				}
 			}
-			console.log(this.bag);
 			for (let i = 0; i < this.bag.length; i++) {
 				this.pieceQueue.push(new Piece(this.tetris.width / 2, this.bag[i]));
 			}
@@ -159,7 +158,6 @@ module.exports = class Player {
 		for (let i = 0; i < this.piece.matrix.length; i++) {
 			for (let j = 0; j < this.piece.matrix[i].length; j++) {
 				if (this.piece.matrix[i][j] !== 0) {
-					console.log("this.matrix", this.matrix)
 					this.matrix[i + this.piece.x][j + this.piece.y] = this.piece.matrix[i][j];
 				}
 			}
