@@ -125,20 +125,27 @@ socket.on('initgame', function (packet) {
   animationid = requestAnimationFrame(DrawAll);
 });
 socket.on('gameover', results => {
+  let scoreList = results.scoreList
   console.log("gameover");
   ingame = false;
   cancelAnimationFrame(animationid);
   let gameovermsg, i = 1;
   SwitchView(['room']);
-  if (typeof results[0] != 'undefined' && typeof results[1] != 'undefined' && results[0].score == results[1].score)
-    gameovermsg = "There was a tie!";
+  if (!results.winner)
+    if (scoreList.length > 1) {
+      gameovermsg = "There was a tie!";
+    } else {
+      gameovermsg = "Game over"
+    }
   else
-    gameovermsg = '<span style="color:green">'+results[0].username + "</span> won the game!";
-  $('#scoreboard').html('<h1>'+ gameovermsg +'</h1><table><tr><th>Placement</th><th>Name</th><th>Score</th></tr>');
-  results.forEach(element => {
-    $('#scoreboard table').append('<tr class="room"><td>' + i++ + "</td><td>"+ element.username +  "</td><td>" + element.score + ' </td></tr>');
+    gameovermsg = '<span style="color:green">' + results.winner.username + "</span> won the game!";
+  $('#scoreboard').html('<h1>'+ gameovermsg +'</h1><table><tr><th>Placement</th><th>Name</th><th>Score</th><th>Pieces Placed</th></tr>');
+  scoreList.forEach(player => {
+    $('#scoreboard table').append('<tr class="room"><td>' + i++ + "</td><td>"+ player.username +  "</td><td>" + player.score + ' </td><td>' + player.piecesPlaced + '</td></tr>');
   });
   $('#scoreboard').append('</table>');
+
+  updatePlayerList(results.players)
 });
 
 let myid;
@@ -164,11 +171,14 @@ $("form#nick").submit(e => {
 });
 
 socket.on('playerlist', playersarray => {
-  $("#playerlist").html("<h1>Players</h1><table><tr><th>Name</th><th>Wins</th><th>Team</th></tr></table>");
-  for (let i = 0; i < playersarray.length; i++) {
-    $('#playerlist table').append('<tr class="room"><td>'+playersarray[i].username+'</td><td>WINS</td><td>TEAM</td></tr>');
-  }
+  updatePlayerList(playersarray)
 });
+function updatePlayerList(playersarray) {
+  $("#playerlist").html("<h1>Players</h1><table><tr><th>Name</th><th>Wins</th></tr></table>");
+  for (let i = 0; i < playersarray.length; i++) {
+    $('#playerlist table').append('<tr class="room"><td>' + playersarray[i].username + '</td><td>' + playersarray[i].wins + '</tr>');
+  }
+}
 
 let shouldskip, packet, ingame = false;
 
@@ -179,14 +189,14 @@ socket.on('packet', packet => {
 
 function DrawAll() {
   if (shouldskip || !lastpacket) {
-    console.log("skipped");
     animationid = requestAnimationFrame(DrawAll);
     return;
   }
   let packet = Object.assign({}, lastpacket);
   let cnv = 0;
-  if (typeof packet.timeleft != 'undefined') {
-    let time = packet.timeleft / 1000,
+  
+  if (typeof packet.timeLeft != 'undefined') {
+    let time = packet.timeLeft / 1000,
         mins = ((time) / 60) | 0,
         secs = ((time % 60) | 0);
     secs = secs < 10 ? '0' + secs : secs;

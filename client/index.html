@@ -52,6 +52,10 @@
       </div>
       <div id="ingame-page" class="page hidden">
         <!-- This is shown whenever in a lobby or in-game -->
+        <div id="time">
+          <p></p>
+        </div>
+
         <div id="maincanvas"></div>
         <div id="canvases"></div>
         <div id="playerlist"></div>
@@ -68,8 +72,9 @@
   <script>
     // Checks whether client is using a touch-device, and imports either the file 'phone' or 'computer' accordingly
     if ('ontouchstart' in window || navigator.maxTouchPoints)
-      $.getScript("phone.js");
-    else
+      // $.getScript("phone.js");
+      $.getScript("computer.js");
+      else
       $.getScript("computer.js");
     $(() => {
       $('#nick > input')[0].focus();

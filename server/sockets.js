@@ -8,6 +8,7 @@ const setupSockets = (io, Players, Rooms) => {
 		Players[clientId] = {};
 		Players[clientId].id = socket.id;
 		Players[clientId].identity = Math.random() * 100000 | 0;
+		Players[clientId].wins = 0;
 		let clientroom;
 		socket.emit('registerrequest', { clientId, identity: Players[clientId].identity });
 

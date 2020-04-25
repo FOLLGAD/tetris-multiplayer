@@ -14,6 +14,7 @@ module.exports = class Player {
 		this.live = true;
 		this.piece = null;
 		this.pieceQueue = [];
+		this.piecesPlaced = 0;
 		this.username = username;
 		this.NewPiece();
 	}
@@ -32,19 +33,19 @@ module.exports = class Player {
 		}
 		this.piece = this.pieceQueue.splice(0, 1)[0];
 	}
-	// takes a piece and outputs it on the matrix
-	DrawPiece(targetMatrix) {
-		if (this.piece !== null) {
-			for (let i = 0; i < this.piece.matrix.length; i++) {
-				for (let j = 0; j < this.piece.matrix[i].length; j++) {
-					if (this.piece.matrix[i][j] !== 0) {
-						targetMatrix[i + this.piece.x][j + this.piece.y] = this.piece.matrix[i][j];
-					}
-				}
-			}
-		}
-		return targetMatrix;
-	}
+	// // takes a piece and outputs it on the matrix
+	// DrawPiece(targetMatrix) {
+	// 	if (this.piece !== null) {
+	// 		for (let i = 0; i < this.piece.matrix.length; i++) {
+	// 			for (let j = 0; j < this.piece.matrix[i].length; j++) {
+	// 				if (this.piece.matrix[i][j] !== 0) {
+	// 					targetMatrix[i + this.piece.x][j + this.piece.y] = this.piece.matrix[i][j];
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return targetMatrix;
+	// }
 	// Draws the piece onto the matrix and returns the outcome
 	DrawMatrix() {
 		let toDeliver = [];
@@ -164,6 +165,7 @@ module.exports = class Player {
 		}
 		this.CheckForFullRows();
 		this.NewPiece();
+		this.piecesPlaced++
 		if (this.CheckForCollision(this.piece, this.piece.x, this.piece.y)) this.Death();
 	}
 	Death() {

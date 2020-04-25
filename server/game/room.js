@@ -6,10 +6,10 @@ module.exports = class Room {
 		this.players = [];
 		this.active = false;
 		this.name = ((Math.random() * 100000) | 0).toString();
-		this.winlist = [];
 		this.type = 'single';
 		this.droprate = 1000;
 		this.gameLength = 2 * 60 * 1000; // 2 minutes
+		this.endingTime = null;
 		this.seed = null;
 		this.io = io
 		// timed mode game length in ms
@@ -34,13 +34,13 @@ module.exports = class Room {
 			deliver[i].username = Players[id].username;
 			deliver[i].identity = Players[id].identity;
 		}
-		this.io.to(this.name).emit('initgame', { width: 10, height: 20, players: deliver });
 		this.startingTime = Date.now();
 		if (this.type == "timed")
 			this.endingTime = Date.now() + this.gameLength;
+		this.io.to(this.name).emit('initgame', { width: 10, height: 20, players: deliver, endingTime: this.endingTime });
 	}
-	CheckWinner(Players) {
-		let winner, scores = [];
+	CheckWinner() {
+		let scores = [];
 		for (let id in this.tetris) {
 			if (!this.tetris[id].live) continue;
 			scores.push({ id, score: this.tetris[id].score });
@@ -48,16 +48,13 @@ module.exports = class Room {
 		scores.sort((a, b) => {
 			return b.score - a.score;
 		});
-		if (!!scores[1] && scores[0].score !== scores[1].score)
-			winner = Players[scores[0].id].username;
-		else if (!!scores[0] && scores.length === 1)
-			winner = Players[scores[0].id].username;
+		let winner = this.players.find(player => player.id === scores[0].id)		
 		this.Stop(winner);
 	}
 	ScoreList() {
 		let scores = [];
 		for (let id in this.tetris) {
-			scores.push({ username: this.tetris[id].username, score: this.tetris[id].score });
+			scores.push({ username: this.tetris[id].username, score: this.tetris[id].score, piecesPlaced: this.tetris[id].piecesPlaced });
 		}
 		scores.sort((a, b) => {
 			return b.score - a.score;
@@ -79,18 +76,22 @@ module.exports = class Room {
 				livecount.push(id);
 			}
 		}
-		if (livecount.length === 1 && this.type != 'single') this.Stop(Players[livecount[0]].username);
+		if (livecount.length === 1 && this.type != 'single') this.Stop(this.players.find(p => p.id === livecount[0]));
 		else if (livecount.length === 0) this.Stop();
 		this.SendPackets(Players);
 	}
-	Stop() {
-		let results = this.ScoreList();
+	Stop(winner) {
+		console.log("winner", winner);
+		if (winner) {
+			winner.wins += 1
+		}
+		let results = {scoreList: this.ScoreList(), players: this.players, winner};
 		this.active = false;
 		this.io.to(this.name).emit('gameover', results);
 		this.startingTime = 0;
 	}
 	SendPackets(Players) {
-		let timeleft = this.endingTime - Date.now(), deliver = [];
+		let deliver = [];
 		for (let id in this.tetris) {
 			const i = deliver.push({}) - 1;
 			deliver[i].matrix = this.tetris[id].DrawMatrix();
@@ -103,8 +104,10 @@ module.exports = class Room {
 				deliver[i].identity = Players[id].identity;
 			}
 		}
-		if (this.type == 'timed')
-			this.io.to(this.name).emit('packet', { deliver, timeleft });
+		if (this.type == 'timed') {
+			let timeLeft = this.endingTime - Date.now()
+			this.io.to(this.name).emit('packet', { deliver, timeLeft});
+		}
 		else
 			this.io.to(this.name).emit('packet', { deliver });
 	}
